@@ -1,0 +1,6 @@
+{
+  "name": "ClariLex - AI Legal Document Navigator",
+  "description": "AI-powered legal document navigator and consumer contract assistant. Translate legal jargon into plain language, flag high-risk clauses, ask grounded questions, and negotiate with confidence.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
