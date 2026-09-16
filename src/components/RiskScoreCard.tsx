@@ -1,5 +1,4 @@
 import React from 'react';
-import { ShieldAlert, AlertTriangle, CheckCircle, Info } from 'lucide-react';
 import { ContractAnalysis } from '../types';
 
 interface RiskScoreCardProps {
@@ -12,20 +11,16 @@ export const RiskScoreCard: React.FC<RiskScoreCardProps> = ({ analysis }) => {
   const warningCount = analysis.redFlags.filter(f => f.riskLevel === 'warning').length;
 
   // Determine color theme based on score (100 is safest, 0 is most predatory)
-  let scoreBg = 'bg-red-50 border-red-200 text-red-700';
   let badgeClass = 'bg-red-100 text-red-800 border-red-300';
   let barColor = 'bg-red-500';
 
   if (score >= 80) {
-    scoreBg = 'bg-emerald-50 border-emerald-200 text-emerald-700';
     badgeClass = 'bg-emerald-100 text-emerald-800 border-emerald-300';
     barColor = 'bg-emerald-500';
   } else if (score >= 60) {
-    scoreBg = 'bg-amber-50 border-amber-200 text-amber-700';
     badgeClass = 'bg-amber-100 text-amber-800 border-amber-300';
     barColor = 'bg-amber-500';
   } else if (score >= 40) {
-    scoreBg = 'bg-orange-50 border-orange-200 text-orange-700';
     badgeClass = 'bg-orange-100 text-orange-800 border-orange-300';
     barColor = 'bg-orange-500';
   }

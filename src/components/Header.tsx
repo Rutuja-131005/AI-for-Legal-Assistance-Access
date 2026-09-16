@@ -135,10 +135,12 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Tab Navigation (When Document is loaded) */}
         {analysis && (
-          <nav className="flex space-x-1 border-t border-stone-200/80 pt-1 pb-2 overflow-x-auto no-scrollbar">
+          <nav className="flex space-x-1 border-t border-stone-200/80 pt-1 pb-2 overflow-x-auto no-scrollbar" role="tablist" aria-label="Analysis Sections">
             <button
+              role="tab"
+              aria-selected={activeTab === 'overview'}
               onClick={() => setActiveTab('overview')}
-              className={`px-3 py-1.5 rounded-md text-xs font-medium whitespace-nowrap transition-colors flex items-center gap-1.5 ${
+              className={`px-3 py-1.5 rounded-md text-xs font-medium whitespace-nowrap transition-colors flex items-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-stone-900 ${
                 activeTab === 'overview'
                   ? 'bg-stone-900 text-white shadow-xs'
                   : 'text-stone-600 hover:text-stone-900 hover:bg-stone-100'
@@ -156,8 +158,10 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
 
             <button
+              role="tab"
+              aria-selected={activeTab === 'clauses'}
               onClick={() => setActiveTab('clauses')}
-              className={`px-3 py-1.5 rounded-md text-xs font-medium whitespace-nowrap transition-colors flex items-center gap-1.5 ${
+              className={`px-3 py-1.5 rounded-md text-xs font-medium whitespace-nowrap transition-colors flex items-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-stone-900 ${
                 activeTab === 'clauses'
                   ? 'bg-stone-900 text-white shadow-xs'
                   : 'text-stone-600 hover:text-stone-900 hover:bg-stone-100'
@@ -169,8 +173,10 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
 
             <button
+              role="tab"
+              aria-selected={activeTab === 'qa'}
               onClick={() => setActiveTab('qa')}
-              className={`px-3 py-1.5 rounded-md text-xs font-medium whitespace-nowrap transition-colors flex items-center gap-1.5 ${
+              className={`px-3 py-1.5 rounded-md text-xs font-medium whitespace-nowrap transition-colors flex items-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-stone-900 ${
                 activeTab === 'qa'
                   ? 'bg-stone-900 text-white shadow-xs'
                   : 'text-stone-600 hover:text-stone-900 hover:bg-stone-100'
@@ -181,8 +187,10 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
 
             <button
+              role="tab"
+              aria-selected={activeTab === 'compare'}
               onClick={() => setActiveTab('compare')}
-              className={`px-3 py-1.5 rounded-md text-xs font-medium whitespace-nowrap transition-colors flex items-center gap-1.5 ${
+              className={`px-3 py-1.5 rounded-md text-xs font-medium whitespace-nowrap transition-colors flex items-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-stone-900 ${
                 activeTab === 'compare'
                   ? 'bg-stone-900 text-white shadow-xs'
                   : 'text-stone-600 hover:text-stone-900 hover:bg-stone-100'
@@ -193,8 +201,10 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
 
             <button
+              role="tab"
+              aria-selected={activeTab === 'negotiate'}
               onClick={() => setActiveTab('negotiate')}
-              className={`px-3 py-1.5 rounded-md text-xs font-medium whitespace-nowrap transition-colors flex items-center gap-1.5 ${
+              className={`px-3 py-1.5 rounded-md text-xs font-medium whitespace-nowrap transition-colors flex items-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-stone-900 ${
                 activeTab === 'negotiate'
                   ? 'bg-stone-900 text-white shadow-xs'
                   : 'text-stone-600 hover:text-stone-900 hover:bg-stone-100'

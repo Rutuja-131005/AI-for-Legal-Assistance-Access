@@ -4,14 +4,13 @@ import {
   Sparkles, 
   Copy, 
   Check, 
-  Send, 
   CheckSquare, 
   Square,
   AlertCircle,
   Loader2,
   FileText
 } from 'lucide-react';
-import { ContractAnalysis, RedFlag, NegotiationDraftResponse } from '../types';
+import { ContractAnalysis, NegotiationDraftResponse } from '../types';
 
 interface NegotiationDrafterViewProps {
   analysis: ContractAnalysis;

@@ -2,11 +2,9 @@ import React from 'react';
 import { 
   FileText, 
   Users, 
-  Calendar, 
   DollarSign, 
   RotateCw, 
   AlertCircle,
-  HelpCircle,
   Clock
 } from 'lucide-react';
 import { ContractAnalysis } from '../types';

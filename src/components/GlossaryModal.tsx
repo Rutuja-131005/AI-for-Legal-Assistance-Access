@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X, Search, BookOpen, AlertTriangle } from 'lucide-react';
-import { LEGAL_GLOSSARY, GlossaryTerm } from '../data/legalGlossary';
+import { LEGAL_GLOSSARY } from '../data/legalGlossary';
 
 interface GlossaryModalProps {
   isOpen: boolean;
@@ -22,7 +22,7 @@ export const GlossaryModal: React.FC<GlossaryModalProps> = ({ isOpen, onClose })
   });
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label="Legal Glossary & Jargon Explainer">
       <div 
         className="bg-white rounded-2xl shadow-2xl border border-stone-200 w-full max-w-3xl overflow-hidden animate-in fade-in zoom-in-95 duration-200"
         onClick={e => e.stopPropagation()}
@@ -44,6 +44,7 @@ export const GlossaryModal: React.FC<GlossaryModalProps> = ({ isOpen, onClose })
           </div>
           <button
             onClick={onClose}
+            aria-label="Close glossary"
             className="p-1 rounded-lg text-stone-400 hover:text-stone-700 hover:bg-stone-200 transition-colors"
           >
             <X className="w-5 h-5" />

@@ -13,7 +13,7 @@ import { GlossaryModal } from './components/GlossaryModal';
 import { ExportReportModal } from './components/ExportReportModal';
 import { SAMPLE_CONTRACTS } from './data/sampleContracts';
 import { ContractAnalysis } from './types';
-import { ShieldCheck, AlertTriangle, BookOpen, Sparkles, HelpCircle } from 'lucide-react';
+import { ShieldCheck } from 'lucide-react';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<'overview' | 'clauses' | 'qa' | 'compare' | 'negotiate'>('overview');
@@ -89,20 +89,15 @@ export default function App() {
         const result = e.target?.result;
         if (!result) return;
 
-        let base64 = '';
-        if (typeof result === 'string') {
-          base64 = result.split(',')[1] || result;
-        } else {
-          base64 = btoa(
-            new Uint8Array(result).reduce((data, byte) => data + String.fromCharCode(byte), '')
-          );
-        }
+        const base64Data = typeof result === 'string'
+          ? (result.split(',')[1] || result)
+          : btoa(new Uint8Array(result).reduce((data, byte) => data + String.fromCharCode(byte), ''));
 
         const response = await fetch('/api/parse-document', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            base64,
+            base64: base64Data,
             filename: file.name,
             mimeType: file.type
           })

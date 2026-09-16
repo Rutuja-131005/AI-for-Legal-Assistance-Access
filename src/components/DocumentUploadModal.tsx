@@ -6,7 +6,6 @@ import {
   FileUp, 
   Sparkles, 
   ShieldCheck, 
-  AlertCircle,
   Loader2
 } from 'lucide-react';
 import { SAMPLE_CONTRACTS } from '../data/sampleContracts';

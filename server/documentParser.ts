@@ -1,8 +1,9 @@
 import mammoth from 'mammoth';
-import { createRequire } from 'module';
+import * as pdfParseModule from 'pdf-parse';
 
-const require = createRequire(import.meta.url);
-const pdfParse = require('pdf-parse');
+// Handle CJS/ESM interop safely for pdf-parse
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const pdfParse = (pdfParseModule as any).default || pdfParseModule;
 
 export interface ParseResult {
   text: string;
@@ -27,16 +28,17 @@ export async function parseDocumentBuffer(
         text: cleanText,
         wordCount: cleanText.split(/\s+/).filter(Boolean).length,
         detectedType: 'pdf',
-        filename
+        filename,
       };
-    } catch (err: any) {
-      console.warn('PDF parse error, falling back to raw string extraction:', err?.message);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.warn('PDF parse error, falling back to raw string extraction:', message);
       const textFallback = buffer.toString('utf-8').replace(/[^\x20-\x7E\n\r\t]/g, ' ');
       return {
         text: textFallback.trim(),
         wordCount: textFallback.split(/\s+/).filter(Boolean).length,
         detectedType: 'pdf',
-        filename
+        filename,
       };
     }
   }
@@ -50,11 +52,12 @@ export async function parseDocumentBuffer(
         text: cleanText,
         wordCount: cleanText.split(/\s+/).filter(Boolean).length,
         detectedType: 'docx',
-        filename
+        filename,
       };
-    } catch (err: any) {
-      console.warn('DOCX parse error:', err?.message);
-      throw new Error(`Failed to parse DOCX file: ${err?.message || 'Unknown error'}`);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.warn('DOCX parse error:', message);
+      throw new Error(`Failed to parse DOCX file: ${message}`, { cause: err });
     }
   }
 
@@ -64,6 +67,6 @@ export async function parseDocumentBuffer(
     text,
     wordCount: text.split(/\s+/).filter(Boolean).length,
     detectedType: 'txt',
-    filename
+    filename,
   };
 }

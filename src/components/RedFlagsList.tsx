@@ -1,14 +1,11 @@
 import React, { useState } from 'react';
 import { 
-  AlertTriangle, 
   ShieldAlert, 
   Copy, 
   Check, 
   ExternalLink, 
-  ArrowRight,
   ChevronDown,
   ChevronUp,
-  Filter,
   Sparkles
 } from 'lucide-react';
 import { RedFlag } from '../types';

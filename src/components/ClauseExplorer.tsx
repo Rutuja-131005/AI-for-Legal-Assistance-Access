@@ -1,13 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   Search, 
-  Sparkles, 
-  ShieldAlert, 
-  CheckCircle2, 
-  Copy, 
-  Check, 
-  ExternalLink,
-  BookOpen
+  CheckCircle2,
+  BookOpen,
+  Check,
+  Copy,
+  Sparkles
 } from 'lucide-react';
 import { Clause } from '../types';
 

@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
-import { 
-  Send, 
+import {
   HelpCircle, 
-  Sparkles, 
+  Send, 
   ShieldCheck, 
-  AlertCircle, 
-  CheckCircle2, 
-  ExternalLink,
-  MessageSquare,
-  Loader2
+  Loader2,
+  CheckCircle2,
+  AlertCircle,
+  Sparkles,
+  ExternalLink
 } from 'lucide-react';
 import { ContractAnalysis, QuestionAnswer } from '../types';
 
@@ -88,8 +87,9 @@ This clause severely compromises your privacy. Under statutory tenant protection
       } else {
         throw new Error(data.error || 'Failed to get answer');
       }
-    } catch (err: any) {
-      console.error('Q&A error:', err);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error('Q&A error:', message);
       // Local fallback
       const fallbackQA: QuestionAnswer = {
         id: `qa-${Date.now()}`,

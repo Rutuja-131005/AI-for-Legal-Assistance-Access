@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
 import { 
   FileDiff, 
-  TrendingUp, 
-  CheckCircle2, 
-  AlertTriangle, 
-  ArrowRight,
-  ShieldCheck,
+  CheckCircle2,
+  Loader2,
   RefreshCw,
-  Loader2
+  TrendingUp,
+  ShieldCheck
 } from 'lucide-react';
 import { ContractAnalysis, DocumentComparisonResult } from '../types';
 import { SAMPLE_CONTRACTS } from '../data/sampleContracts';
