@@ -8,7 +8,9 @@ import { extractRightsAndObligations } from './rightsObligationsExtractor.js';
 import { identifyMissingProtections } from './missingClausesDetector.js';
 import { calculateRiskScore } from './riskScorer.js';
 import { generateExecutiveSummary } from './summaryGenerator.js';
-import { enhanceAnalysisWithAI, answerQuestionWithAI, getGeminiClient } from './aiAnalyzer.js';
+import { recordDocumentProcessing } from './metricsTracker.js';
+import { executeGroundedRAGQuery } from './ragPipeline.js';
+import { detectLanguageIntent, translateLegalExplanation } from './multilingualService.js';
 
 // Re-export sub-services for direct usage if needed
 export {
@@ -23,7 +25,10 @@ export {
   generateExecutiveSummary,
   enhanceAnalysisWithAI,
   answerQuestionWithAI,
-  getGeminiClient
+  getGeminiClient,
+  executeGroundedRAGQuery,
+  detectLanguageIntent,
+  translateLegalExplanation
 };
 
 // High-performance analysis cache (Max 100 items LRU eviction)
@@ -43,6 +48,7 @@ export function analyzeDocumentText(rawText, customTitle) {
     return analysisCache.get(cacheKey);
   }
 
+  const startTime = Date.now();
   const category = detectDocumentCategory(rawText);
   const categoryDisplayName = getCategoryDisplayName(category);
   const clauses = segmentClauses(rawText);
@@ -75,6 +81,8 @@ export function analyzeDocumentText(rawText, customTitle) {
     wordCount,
     processedAt: new Date().toISOString()
   };
+
+  recordDocumentProcessing(Date.now() - startTime, wordCount);
 
   if (analysisCache.size >= MAX_CACHE_SIZE) {
     const oldestKey = analysisCache.keys().next().value;

@@ -17,7 +17,7 @@ import {
 import { errorHandler } from './server/middleware/errorHandler.js';
 import { sessionAuthMiddleware } from './server/middleware/sessionAuth.js';
 
-import { parseDocumentBuffer } from './server/documentParser.js';
+import { getSystemMetrics } from './server/services/metricsTracker.js';
 import {
   analyzeDocumentText,
   answerQuestionLocally,
@@ -25,6 +25,9 @@ import {
   enhanceAnalysisWithAI,
   answerQuestionWithAI,
   getGeminiClient,
+  executeGroundedRAGQuery,
+  detectLanguageIntent,
+  translateLegalExplanation,
 } from './server/services/analysisService.js';
 
 dotenv.config();
@@ -59,6 +62,14 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Observability & System Metrics Endpoint
+app.get('/api/metrics', (req, res) => {
+  res.json({
+    success: true,
+    metrics: getSystemMetrics(),
+  });
+});
+
 // 2. Parse Document Buffer or Plain Text (Upload Limiter)
 app.post(
   '/api/parse-document',
@@ -85,6 +96,7 @@ app.post(
       }
 
       const buffer = Buffer.from(base64, 'base64');
+      const { parseDocumentBuffer } = await import('./server/documentParser.js');
       const parsed = await parseDocumentBuffer(buffer, filename, mimeType);
       const analysis = analyzeDocumentText(parsed.text, filename);
 
@@ -122,32 +134,31 @@ app.post(
   }
 );
 
-// 4. Grounded Document Q&A (RAG) Endpoint (AI Operation Limiter)
+// 4. Grounded Document Q&A (RAG) Endpoint (AI Operation Limiter & Multilingual Support)
 app.post(
   '/api/ask-question',
   aiOperationLimiter,
   validateRequestBody(askQuestionSchema),
   async (req, res, next) => {
     try {
-      const { question, contractText, rawText, analysis } = req.body;
+      const { question, contractText, rawText, analysis, language = 'en' } = req.body;
       const textToUse = contractText || rawText || '';
-
       const currentAnalysis = analysis || analyzeDocumentText(textToUse);
 
-      if (textToUse.trim().length > 0) {
-        const aiAnswer = await answerQuestionWithAI(question, textToUse);
-        if (aiAnswer) {
-          return res.json({
-            success: true,
-            ...aiAnswer,
-          });
-        }
+      const targetLang = language !== 'en' ? language : detectLanguageIntent(question);
+
+      // Execute RAG Pipeline with Evidence Validation Layer
+      const ragResult = await executeGroundedRAGQuery(question, textToUse, currentAnalysis);
+
+      // Translate explanation if target language is Hindi (hi) or Marathi (mr)
+      if (targetLang !== 'en' && ragResult.answer) {
+        ragResult.answer = await translateLegalExplanation(ragResult.answer, targetLang);
+        ragResult.languageUsed = targetLang;
       }
 
-      const localResult = answerQuestionLocally(question, currentAnalysis);
       return res.json({
         success: true,
-        ...localResult,
+        ...ragResult,
       });
     } catch (err) {
       next(err);

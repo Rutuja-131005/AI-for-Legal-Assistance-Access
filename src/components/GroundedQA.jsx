@@ -14,6 +14,7 @@ const GroundedQAComponent = ({
   suggestedQuestions = [],
   onJumpToClause
 }) => {
+  const [selectedLang, setSelectedLang] = useState('en');
   const [question, setQuestion] = useState('');
   const [loading, setLoading] = useState(false);
   const [qaHistory, setQaHistory] = useState([
@@ -32,10 +33,12 @@ This clause severely compromises your privacy. Under statutory tenant protection
         {
           clauseId: 'clause-5',
           clauseTitle: '5. LANDLORD RIGHT OF ENTRY',
+          pageNumber: 1,
+          sectionName: '5. LANDLORD RIGHT OF ENTRY',
           quote: 'with or without prior oral or written notice, for purposes of inspection...'
         }
       ],
-      confidence: 'high',
+      confidence: 'HIGH',
       timestamp: 'Just now'
     }
   ]);
@@ -60,7 +63,8 @@ This clause severely compromises your privacy. Under statutory tenant protection
         body: JSON.stringify({
           question: queryText,
           contractText: analysis?.rawText || '',
-          analysis
+          analysis,
+          language: selectedLang
         })
       });
 
@@ -72,7 +76,7 @@ This clause severely compromises your privacy. Under statutory tenant protection
           answer: data.answer,
           isGrounded: data.isGrounded,
           citedClauses: data.citedClauses,
-          confidence: data.confidence,
+          confidence: data.confidence || 'HIGH',
           missingClauseWarning: data.missingClauseWarning,
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         };
@@ -85,19 +89,52 @@ This clause severely compromises your privacy. Under statutory tenant protection
     } finally {
       setLoading(false);
     }
-  }, [analysis, loading]);
+  }, [analysis, loading, selectedLang]);
 
   return (
     <div className="bg-white rounded-2xl p-6 border border-stone-200/90 shadow-xs space-y-6">
       {/* Header */}
-      <div className="border-b border-stone-100 pb-4">
-        <h2 className="font-serif text-lg font-bold text-stone-900 flex items-center gap-2">
-          <HelpCircle className="w-5 h-5 text-amber-600" />
-          <span>Grounded Document Question & Answering (RAG)</span>
-        </h2>
-        <p className="text-xs text-stone-600 mt-0.5">
-          Ask any specific question about your rights, penalties, or restrictions. Answers are mathematically grounded in verbatim contract clauses.
-        </p>
+      <div className="border-b border-stone-100 pb-4 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 className="font-serif text-lg font-bold text-stone-900 flex items-center gap-2">
+            <HelpCircle className="w-5 h-5 text-amber-600" />
+            <span>Grounded Document Question & Answering (RAG)</span>
+          </h2>
+          <p className="text-xs text-stone-600 mt-0.5">
+            Ask specific questions. Answers are mathematically grounded in verbatim contract clauses with explicit evidence verification.
+          </p>
+        </div>
+
+        {/* Language Selector */}
+        <div className="flex items-center gap-1 bg-stone-100 p-1 rounded-lg border border-stone-200">
+          <button
+            type="button"
+            onClick={() => setSelectedLang('en')}
+            className={`px-2.5 py-1 rounded text-xs font-semibold transition-all ${
+              selectedLang === 'en' ? 'bg-stone-900 text-white shadow-xs' : 'text-stone-600 hover:text-stone-900'
+            }`}
+          >
+            English
+          </button>
+          <button
+            type="button"
+            onClick={() => setSelectedLang('hi')}
+            className={`px-2.5 py-1 rounded text-xs font-semibold transition-all ${
+              selectedLang === 'hi' ? 'bg-stone-900 text-white shadow-xs' : 'text-stone-600 hover:text-stone-900'
+            }`}
+          >
+            हिन्दी
+          </button>
+          <button
+            type="button"
+            onClick={() => setSelectedLang('mr')}
+            className={`px-2.5 py-1 rounded text-xs font-semibold transition-all ${
+              selectedLang === 'mr' ? 'bg-stone-900 text-white shadow-xs' : 'text-stone-600 hover:text-stone-900'
+            }`}
+          >
+            मराठी
+          </button>
+        </div>
       </div>
 
       {/* Question Input Box */}

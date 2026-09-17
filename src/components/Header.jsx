@@ -20,9 +20,10 @@ const HeaderComponent = ({
   onOpenUpload,
   onSelectSample,
   onOpenGlossary,
-  onOpenExport
+  onOpenExport,
+  onOpenMetrics
 }) => {
-  const tabs = ['overview', 'clauses', 'qa', 'compare', 'negotiate'];
+  const tabs = ['overview', 'clauses', 'timeline', 'qa', 'compare', 'negotiate'];
 
   const handleTabKeyDown = (e, currentTab) => {
     const currentIndex = tabs.indexOf(currentTab);
@@ -116,6 +117,17 @@ const HeaderComponent = ({
               <span className="hidden sm:inline">Legal Glossary</span>
             </button>
 
+            {/* System Metrics Button */}
+            <button
+              onClick={onOpenMetrics}
+              className="px-3 py-1.5 rounded-lg border border-stone-300 text-xs font-medium text-stone-700 hover:bg-stone-100 transition-colors flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-900"
+              title="System Observability Metrics"
+              aria-label="Open System Metrics"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+              <span className="hidden sm:inline">Metrics</span>
+            </button>
+
             {/* Export Analysis */}
             {analysis && (
               <button
@@ -180,6 +192,21 @@ const HeaderComponent = ({
               <FileText className="w-3.5 h-3.5" />
               <span>Clause Explorer</span>
               <span className="text-[10px] opacity-70">({(analysis.clauses || []).length})</span>
+            </button>
+
+            <button
+              role="tab"
+              aria-selected={activeTab === 'timeline'}
+              onClick={() => setActiveTab('timeline')}
+              onKeyDown={e => handleTabKeyDown(e, 'timeline')}
+              className={`px-3 py-1.5 rounded-md text-xs font-medium whitespace-nowrap transition-colors flex items-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-stone-900 ${
+                activeTab === 'timeline'
+                  ? 'bg-stone-900 text-white shadow-xs'
+                  : 'text-stone-600 hover:text-stone-900 hover:bg-stone-100'
+              }`}
+            >
+              <BookOpen className="w-3.5 h-3.5" />
+              <span>Key Dates & Timeline</span>
             </button>
 
             <button

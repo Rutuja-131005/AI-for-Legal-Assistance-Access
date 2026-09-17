@@ -78,10 +78,11 @@ function categorizeClause(title, text) {
   return 'general';
 }
 
-function buildClauseObject(index, title, text) {
+function buildClauseObject(index, title, text, charOffset = 0) {
   const category = categorizeClause(title, text);
   const id = `clause-${index + 1}`;
   const lowerText = text.toLowerCase();
+  const pageNumber = Math.max(1, Math.floor(charOffset / 2000) + 1);
 
   let riskLevel = 'standard';
   let riskReason = '';
@@ -108,10 +109,15 @@ function buildClauseObject(index, title, text) {
 
   return {
     id,
+    chunk_id: id,
     index,
     title,
+    sectionName: title,
+    clauseName: title,
     category,
     text,
+    source_text: text,
+    pageNumber,
     riskLevel,
     riskReason,
     suggestedRevision,

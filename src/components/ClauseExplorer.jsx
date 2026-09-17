@@ -219,12 +219,25 @@ const ClauseExplorerComponent = ({
               <div className="p-4 rounded-xl bg-stone-50 border border-stone-200/80 space-y-1.5">
                 <div className="text-xs font-bold text-stone-900 flex items-center gap-1.5">
                   <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-                  <span>Plain-English Translation ("In Plain Terms")</span>
+                  <span>Simple Explanation ("In Plain Language")</span>
                 </div>
                 <p className="text-xs text-stone-700 leading-relaxed font-sans">
                   {activeClause.riskReason || 
                     `This clause outlines standard responsibilities relating to ${activeClause.category}. It establishes procedural timelines and binding conditions.`}
                 </p>
+              </div>
+
+              {/* Neutral Verification Checklist: What You Should Check */}
+              <div className="p-4 rounded-xl bg-amber-50/50 border border-amber-200/80 space-y-2 text-xs">
+                <div className="font-bold text-amber-950 flex items-center gap-1.5">
+                  <BookOpen className="w-3.5 h-3.5 text-amber-700" />
+                  <span>What You Should Check (Neutral Verification Checklist)</span>
+                </div>
+                <ul className="list-disc pl-4 space-y-1 text-amber-900 font-sans">
+                  <li>Verify if written notice deadlines align with local consumer laws.</li>
+                  <li>Confirm whether financial penalties or fees have grace periods.</li>
+                  <li>Check if obligations apply equally to both parties (mutual protection).</li>
+                </ul>
               </div>
 
               {/* Suggested Fairer Counter-Revision if Risky */}

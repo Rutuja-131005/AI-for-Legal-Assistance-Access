@@ -6,6 +6,7 @@ import { RedFlagsList } from './components/RedFlagsList.jsx';
 import { RightsObligationsMatrix } from './components/RightsObligationsMatrix.jsx';
 import { ClauseExplorer } from './components/ClauseExplorer.jsx';
 import { GroundedQA } from './components/GroundedQA.jsx';
+import { TimelineView } from './components/TimelineView.jsx';
 import { SAMPLE_CONTRACTS } from './data/sampleContracts.js';
 import { ShieldCheck, Loader2 } from 'lucide-react';
 
@@ -15,6 +16,7 @@ const DocumentComparisonView = lazy(() => import('./components/DocumentCompariso
 const NegotiationDrafterView = lazy(() => import('./components/NegotiationDrafterView.jsx').then(m => ({ default: m.NegotiationDrafterView })));
 const GlossaryModal = lazy(() => import('./components/GlossaryModal.jsx').then(m => ({ default: m.GlossaryModal })));
 const ExportReportModal = lazy(() => import('./components/ExportReportModal.jsx').then(m => ({ default: m.ExportReportModal })));
+const MetricsDashboardModal = lazy(() => import('./components/MetricsDashboardModal.jsx').then(m => ({ default: m.MetricsDashboardModal })));
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -22,6 +24,7 @@ export default function App() {
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [isGlossaryOpen, setIsGlossaryOpen] = useState(false);
   const [isExportOpen, setIsExportOpen] = useState(false);
+  const [isMetricsOpen, setIsMetricsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [activeClauseId, setActiveClauseId] = useState(undefined);
   const [negotiationPreselectedFlag, setNegotiationPreselectedFlag] = useState(undefined);
@@ -159,6 +162,7 @@ export default function App() {
         onSelectSample={handleSelectSample}
         onOpenGlossary={() => setIsGlossaryOpen(true)}
         onOpenExport={() => setIsExportOpen(true)}
+        onOpenMetrics={() => setIsMetricsOpen(true)}
       />
 
       {/* Main Container */}
@@ -232,7 +236,14 @@ export default function App() {
               </div>
             )}
 
-            {/* VIEW 3: GROUNDED Q&A */}
+            {/* VIEW 3: KEY DATES & TIMELINE */}
+            {activeTab === 'timeline' && (
+              <div className="animate-in fade-in duration-300">
+                <TimelineView analysis={analysis} />
+              </div>
+            )}
+
+            {/* VIEW 4: GROUNDED Q&A */}
             {activeTab === 'qa' && (
               <div className="animate-in fade-in duration-300">
                 <GroundedQA
@@ -243,14 +254,14 @@ export default function App() {
               </div>
             )}
 
-            {/* VIEW 4: VERSION DIFF & COMPARE */}
+            {/* VIEW 5: VERSION DIFF & COMPARE */}
             {activeTab === 'compare' && (
               <div className="animate-in fade-in duration-300">
                 <DocumentComparisonView currentAnalysis={analysis} />
               </div>
             )}
 
-            {/* VIEW 5: NEGOTIATION DRAFTER */}
+            {/* VIEW 6: NEGOTIATION DRAFTER */}
             {activeTab === 'negotiate' && (
               <div className="animate-in fade-in duration-300">
                 <NegotiationDrafterView
@@ -315,6 +326,11 @@ export default function App() {
         <GlossaryModal
           isOpen={isGlossaryOpen}
           onClose={() => setIsGlossaryOpen(false)}
+        />
+
+        <MetricsDashboardModal
+          isOpen={isMetricsOpen}
+          onClose={() => setIsMetricsOpen(false)}
         />
 
         {analysis && (
