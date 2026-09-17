@@ -35,7 +35,10 @@ export function setupSecurityMiddleware(app) {
       origin: (origin, callback) => {
         // Allow requests with no origin (like mobile apps, curl, or same-origin SSR/Vite proxy)
         if (!origin) return callback(null, true);
-        if (allowedOrigins.includes(origin)) {
+        if (
+          allowedOrigins.includes(origin) ||
+          /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)
+        ) {
           return callback(null, true);
         }
         return callback(new Error(`CORS origin violation: Origin '${origin}' is not allowed.`));
