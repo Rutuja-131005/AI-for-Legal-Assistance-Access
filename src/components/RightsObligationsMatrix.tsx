@@ -6,10 +6,10 @@ interface RightsObligationsMatrixProps {
   items: RightObligation[];
 }
 
-export const RightsObligationsMatrix: React.FC<RightsObligationsMatrixProps> = ({ items }) => {
-  const rights = items.filter(i => i.type === 'right');
-  const obligations = items.filter(i => i.type === 'obligation');
-  const restrictions = items.filter(i => i.type === 'restriction');
+const RightsObligationsMatrixComponent: React.FC<RightsObligationsMatrixProps> = ({ items }) => {
+  const rights = React.useMemo(() => items.filter(i => i.type === 'right'), [items]);
+  const obligations = React.useMemo(() => items.filter(i => i.type === 'obligation'), [items]);
+  const restrictions = React.useMemo(() => items.filter(i => i.type === 'restriction'), [items]);
 
   return (
     <div className="bg-white rounded-2xl p-6 border border-stone-200/90 shadow-xs space-y-4">
@@ -18,7 +18,7 @@ export const RightsObligationsMatrix: React.FC<RightsObligationsMatrixProps> = (
           <Shield className="w-5 h-5 text-stone-700" />
           <span>Rights & Obligations Balance</span>
         </h2>
-        <p className="text-xs text-stone-500 mt-0.5">
+        <p className="text-xs text-stone-600 mt-0.5">
           Clear distinction between what you are legally entitled to receive versus burdens and restrictions placed on you.
         </p>
       </div>
@@ -37,7 +37,7 @@ export const RightsObligationsMatrix: React.FC<RightsObligationsMatrixProps> = (
             </div>
             <ul className="space-y-2.5 text-xs text-stone-700">
               {rights.length === 0 ? (
-                <li className="text-stone-400 italic">No explicit rights recognized for consumer.</li>
+                <li className="text-stone-500 italic">No explicit rights recognized for consumer.</li>
               ) : (
                 rights.map((item, idx) => (
                   <li key={idx} className="flex items-start gap-2">
@@ -66,7 +66,7 @@ export const RightsObligationsMatrix: React.FC<RightsObligationsMatrixProps> = (
             </div>
             <ul className="space-y-2.5 text-xs text-stone-700">
               {obligations.length === 0 ? (
-                <li className="text-stone-400 italic">No direct obligations listed.</li>
+                <li className="text-stone-500 italic">No direct obligations listed.</li>
               ) : (
                 obligations.map((item, idx) => (
                   <li key={idx} className="flex items-start gap-2">
@@ -95,7 +95,7 @@ export const RightsObligationsMatrix: React.FC<RightsObligationsMatrixProps> = (
             </div>
             <ul className="space-y-2.5 text-xs text-stone-700">
               {restrictions.length === 0 ? (
-                <li className="text-stone-400 italic">No standard restrictions detected.</li>
+                <li className="text-stone-500 italic">No standard restrictions detected.</li>
               ) : (
                 restrictions.map((item, idx) => (
                   <li key={idx} className="flex items-start gap-2">
@@ -114,3 +114,5 @@ export const RightsObligationsMatrix: React.FC<RightsObligationsMatrixProps> = (
     </div>
   );
 };
+
+export const RightsObligationsMatrix = React.memo(RightsObligationsMatrixComponent);

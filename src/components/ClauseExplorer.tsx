@@ -15,7 +15,7 @@ interface ClauseExplorerProps {
   onSelectClause?: (id: string) => void;
 }
 
-export const ClauseExplorer: React.FC<ClauseExplorerProps> = ({
+const ClauseExplorerComponent: React.FC<ClauseExplorerProps> = ({
   clauses,
   activeClauseId,
   onSelectClause
@@ -34,13 +34,17 @@ export const ClauseExplorer: React.FC<ClauseExplorerProps> = ({
     }
   }, [activeClauseId]);
 
-  const filteredClauses = clauses.filter(c => {
-    const matchesSearch = (c.title + ' ' + c.text).toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCat = categoryFilter === 'all' || c.category === categoryFilter;
-    return matchesSearch && matchesCat;
-  });
+  const filteredClauses = React.useMemo(() => {
+    return clauses.filter(c => {
+      const matchesSearch = (c.title + ' ' + c.text).toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesCat = categoryFilter === 'all' || c.category === categoryFilter;
+      return matchesSearch && matchesCat;
+    });
+  }, [clauses, searchQuery, categoryFilter]);
 
-  const activeClause = clauses.find(c => c.id === selectedId) || clauses[0];
+  const activeClause = React.useMemo(() => {
+    return clauses.find(c => c.id === selectedId) || clauses[0];
+  }, [clauses, selectedId]);
 
   const handleCopyText = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -75,24 +79,29 @@ export const ClauseExplorer: React.FC<ClauseExplorerProps> = ({
 
           {/* Search Box */}
           <div className="relative w-full sm:w-64">
+            <label htmlFor="clause-search-input" className="sr-only">Search clauses or keywords</label>
             <Search className="w-3.5 h-3.5 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
+              id="clause-search-input"
               type="text"
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               placeholder="Search clauses or keywords..."
-              className="w-full text-xs pl-8 pr-3 py-1.5 bg-white border border-stone-300 rounded-lg focus:outline-hidden focus:ring-1 focus:ring-stone-900"
+              aria-label="Search clauses or keywords"
+              className="w-full text-xs pl-8 pr-3 py-1.5 bg-white border border-stone-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-stone-900"
             />
           </div>
         </div>
 
         {/* Category Filter Chips */}
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1" role="tablist" aria-label="Clause Categories">
           {categories.map(cat => (
             <button
               key={cat.id}
+              role="tab"
+              aria-selected={categoryFilter === cat.id}
               onClick={() => setCategoryFilter(cat.id)}
-              className={`px-2.5 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
+              className={`px-2.5 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-900 ${
                 categoryFilter === cat.id
                   ? 'bg-stone-900 text-white'
                   : 'bg-white border border-stone-200 text-stone-600 hover:bg-stone-100'
@@ -107,9 +116,9 @@ export const ClauseExplorer: React.FC<ClauseExplorerProps> = ({
       {/* 2-Column Split View: Directory (Left) + Detailed Reader (Right) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 min-h-[520px]">
         {/* Left: Clause List */}
-        <div className="lg:col-span-4 border-r border-stone-200 max-h-[560px] overflow-y-auto divide-y divide-stone-100">
+        <div className="lg:col-span-4 border-r border-stone-200 max-h-[560px] overflow-y-auto divide-y divide-stone-100" role="listbox" aria-label="Contract Clauses">
           {filteredClauses.length === 0 ? (
-            <div className="p-8 text-center text-xs text-stone-400">
+            <div className="p-8 text-center text-xs text-stone-500">
               No matching clauses found.
             </div>
           ) : (
@@ -121,18 +130,28 @@ export const ClauseExplorer: React.FC<ClauseExplorerProps> = ({
               return (
                 <div
                   key={clause.id}
+                  role="option"
+                  aria-selected={isSelected}
+                  tabIndex={0}
                   onClick={() => {
                     setSelectedId(clause.id);
                     onSelectClause?.(clause.id);
                   }}
-                  className={`p-3.5 cursor-pointer transition-all ${
+                  onKeyDown={e => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setSelectedId(clause.id);
+                      onSelectClause?.(clause.id);
+                    }
+                  }}
+                  className={`p-3.5 cursor-pointer transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-900 ${
                     isSelected
                       ? 'bg-stone-100/90 border-l-4 border-l-stone-900'
                       : 'hover:bg-stone-50'
                   }`}
                 >
                   <div className="flex items-center justify-between gap-2 mb-1">
-                    <span className="text-[10px] font-mono text-stone-400 uppercase">
+                    <span className="text-[10px] font-mono text-stone-600 uppercase font-semibold">
                       {clause.category}
                     </span>
                     {isCritical && (
@@ -149,7 +168,7 @@ export const ClauseExplorer: React.FC<ClauseExplorerProps> = ({
                   <h4 className="text-xs font-bold text-stone-900 line-clamp-1">
                     {clause.title}
                   </h4>
-                  <p className="text-[11px] text-stone-500 mt-0.5 line-clamp-2">
+                  <p className="text-[11px] text-stone-600 mt-0.5 line-clamp-2">
                     {clause.text}
                   </p>
                 </div>
@@ -240,7 +259,7 @@ export const ClauseExplorer: React.FC<ClauseExplorerProps> = ({
               </div>
             </>
           ) : (
-            <div className="py-20 text-center text-xs text-stone-400">
+            <div className="py-20 text-center text-xs text-stone-500">
               Select a clause from the left to view details.
             </div>
           )}
@@ -249,3 +268,5 @@ export const ClauseExplorer: React.FC<ClauseExplorerProps> = ({
     </div>
   );
 };
+
+export const ClauseExplorer = React.memo(ClauseExplorerComponent);

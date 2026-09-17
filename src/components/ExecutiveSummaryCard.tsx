@@ -13,7 +13,7 @@ interface ExecutiveSummaryCardProps {
   analysis: ContractAnalysis;
 }
 
-export const ExecutiveSummaryCard: React.FC<ExecutiveSummaryCardProps> = ({ analysis }) => {
+const ExecutiveSummaryCardComponent: React.FC<ExecutiveSummaryCardProps> = ({ analysis }) => {
   const { keyEntities, missingStandardProtections } = analysis;
 
   return (
@@ -25,7 +25,7 @@ export const ExecutiveSummaryCard: React.FC<ExecutiveSummaryCardProps> = ({ anal
             <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-stone-100 text-stone-700 border border-stone-200">
               {analysis.categoryDisplayName}
             </span>
-            <span className="text-xs text-stone-400">
+            <span className="text-xs text-stone-600">
               {analysis.wordCount} words • {analysis.clauses.length} clauses analyzed
             </span>
           </div>
@@ -125,3 +125,5 @@ export const ExecutiveSummaryCard: React.FC<ExecutiveSummaryCardProps> = ({ anal
     </div>
   );
 };
+
+export const ExecutiveSummaryCard = React.memo(ExecutiveSummaryCardComponent);

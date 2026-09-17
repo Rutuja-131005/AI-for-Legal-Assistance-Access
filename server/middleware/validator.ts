@@ -57,8 +57,9 @@ export function validateRequestBody(schema: z.ZodSchema) {
     const result = schema.safeParse(req.body);
     if (!result.success) {
       const issue = result.error.issues[0];
+      const pathStr = issue && issue.path.length > 0 ? issue.path.join('.') : 'payload';
       return res.status(400).json({
-        error: issue ? `Invalid input (${issue.path.join('.')}): ${issue.message}` : 'Invalid request payload.',
+        error: issue ? `Validation Error (${pathStr}): ${issue.message}` : 'Validation Error: Invalid request payload.',
       });
     }
     req.body = result.data;

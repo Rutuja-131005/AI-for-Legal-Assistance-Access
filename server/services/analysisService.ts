@@ -26,10 +26,25 @@ export {
   getGeminiClient
 };
 
+import crypto from 'crypto';
+
+// High-performance analysis cache (Max 100 items LRU eviction)
+const analysisCache = new Map<string, ContractAnalysis>();
+const MAX_CACHE_SIZE = 100;
+
+function computeCacheKey(rawText: string, customTitle?: string): string {
+  return crypto.createHash('sha256').update(rawText + (customTitle || '')).digest('hex');
+}
+
 /**
- * Full Analysis Pipeline (Heuristic + Rules + optional AI Enhancement)
+ * Full Analysis Pipeline (Heuristic + Rules + optional AI Enhancement with SHA-256 LRU Caching)
  */
 export function analyzeDocumentText(rawText: string, customTitle?: string): ContractAnalysis {
+  const cacheKey = computeCacheKey(rawText, customTitle);
+  if (analysisCache.has(cacheKey)) {
+    return analysisCache.get(cacheKey)!;
+  }
+
   const category = detectDocumentCategory(rawText);
   const categoryDisplayName = getCategoryDisplayName(category);
   const clauses = segmentClauses(rawText);
@@ -45,7 +60,7 @@ export function analyzeDocumentText(rawText: string, customTitle?: string): Cont
 
   const executiveSummary = generateExecutiveSummary(category, categoryDisplayName, keyEntities, redFlags, clauses);
 
-  return {
+  const result: ContractAnalysis = {
     documentTitle,
     category,
     categoryDisplayName,
@@ -62,6 +77,14 @@ export function analyzeDocumentText(rawText: string, customTitle?: string): Cont
     wordCount,
     processedAt: new Date().toISOString()
   };
+
+  if (analysisCache.size >= MAX_CACHE_SIZE) {
+    const oldestKey = analysisCache.keys().next().value;
+    if (oldestKey) analysisCache.delete(oldestKey);
+  }
+  analysisCache.set(cacheKey, result);
+
+  return result;
 }
 
 /**

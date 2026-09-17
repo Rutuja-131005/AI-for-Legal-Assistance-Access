@@ -1,8 +1,12 @@
 import { Clause, RedFlag } from '../../src/types';
 
 /**
- * Identify Red Flags across the document using pattern-based heuristic analysis.
- * All results are derived from the actual document text — never fabricated.
+ * Evaluates segmented clauses against rule-based legal screening patterns to detect predatory terms,
+ * unilateral waivers, unreasonable fee traps, and exit restrictions.
+ * 
+ * @param clauses Array of segmented contract clauses
+ * @param rawText Full un-segmented text for global pattern checks
+ * @returns Array of identified RedFlag objects containing verbatim quotes, issues, and counter-proposals
  */
 export function identifyRedFlags(clauses: Clause[], rawText: string): RedFlag[] {
   const redFlags: RedFlag[] = [];

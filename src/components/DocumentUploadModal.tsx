@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   X, 
   UploadCloud, 
@@ -19,7 +19,7 @@ interface DocumentUploadModalProps {
   onSelectSample: (sampleId: string) => void;
 }
 
-export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
+const DocumentUploadModalComponent: React.FC<DocumentUploadModalProps> = ({
   isOpen,
   onClose,
   onAnalyzeText,
@@ -32,6 +32,61 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
   const [customTitle, setCustomTitle] = useState('');
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      previousFocusRef.current = document.activeElement as HTMLElement;
+      const modalElement = modalRef.current;
+      if (modalElement) {
+        const focusableElements = modalElement.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusableElements.length > 0) {
+          focusableElements[0].focus();
+        }
+      }
+    } else if (previousFocusRef.current) {
+      previousFocusRef.current.focus();
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!isOpen) return;
+
+      if (e.key === 'Escape') {
+        onClose();
+        return;
+      }
+
+      if (e.key === 'Tab' && modalRef.current) {
+        const focusables = modalRef.current.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusables.length === 0) return;
+
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+
+        if (e.shiftKey) {
+          if (document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+          }
+        } else {
+          if (document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+          }
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
@@ -67,24 +122,32 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div
+      className="fixed inset-0 z-50 overflow-y-auto bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="upload-modal-title"
+      aria-describedby="upload-modal-desc"
+    >
       <div 
+        ref={modalRef}
         className="bg-white rounded-2xl shadow-2xl border border-stone-200 w-full max-w-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
         <div className="px-6 py-4 border-b border-stone-200 flex items-center justify-between bg-stone-50">
           <div>
-            <h2 className="font-serif text-lg font-bold text-stone-900">
+            <h2 id="upload-modal-title" className="font-serif text-lg font-bold text-stone-900">
               Analyze a Legal Document
             </h2>
-            <p className="text-xs text-stone-500">
+            <p id="upload-modal-desc" className="text-xs text-stone-600">
               Upload an agreement, paste contract clauses, or explore pre-loaded examples.
             </p>
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg text-stone-400 hover:text-stone-700 hover:bg-stone-200 transition-colors"
+            aria-label="Close modal"
+            className="p-1 rounded-lg text-stone-500 hover:text-stone-800 hover:bg-stone-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-900"
           >
             <X className="w-5 h-5" />
           </button>
@@ -151,26 +214,35 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
                     {SAMPLE_CONTRACTS.map(sample => (
                       <div
                         key={sample.id}
+                        role="button"
+                        tabIndex={0}
                         onClick={() => {
                           onSelectSample(sample.id);
                           onClose();
                         }}
-                        className="p-3.5 rounded-xl border border-stone-200 hover:border-stone-400 hover:bg-stone-50/80 transition-all cursor-pointer group flex flex-col justify-between"
+                        onKeyDown={e => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            onSelectSample(sample.id);
+                            onClose();
+                          }
+                        }}
+                        className="p-3.5 rounded-xl border border-stone-200 hover:border-stone-400 hover:bg-stone-50/80 transition-all cursor-pointer group flex flex-col justify-between focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-900"
                       >
                         <div>
                           <div className="flex items-center justify-between mb-1.5">
-                            <span className="text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                            <span className="text-[11px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
                               {sample.badge}
                             </span>
                           </div>
                           <h4 className="text-xs font-bold text-stone-900 group-hover:text-amber-900">
                             {sample.title}
                           </h4>
-                          <p className="text-[11px] text-stone-500 mt-1 line-clamp-2">
+                          <p className="text-[11px] text-stone-600 mt-1 line-clamp-2">
                             {sample.description}
                           </p>
                         </div>
-                        <span className="text-[11px] font-medium text-stone-700 mt-3 flex items-center gap-1 group-hover:underline">
+                        <span className="text-[11px] font-medium text-stone-800 mt-3 flex items-center gap-1 group-hover:underline">
                           Load Contract →
                         </span>
                       </div>
@@ -276,3 +348,5 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
     </div>
   );
 };
+
+export const DocumentUploadModal = React.memo(DocumentUploadModalComponent);

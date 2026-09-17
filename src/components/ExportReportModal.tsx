@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { X, Printer, Copy, Check, FileText, ShieldAlert } from 'lucide-react';
 import { ContractAnalysis } from '../types';
 
@@ -8,12 +8,67 @@ interface ExportReportModalProps {
   analysis: ContractAnalysis;
 }
 
-export const ExportReportModal: React.FC<ExportReportModalProps> = ({
+const ExportReportModalComponent: React.FC<ExportReportModalProps> = ({
   isOpen,
   onClose,
   analysis
 }) => {
   const [copied, setCopied] = useState(false);
+  const modalRef = useRef<HTMLDivElement>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      previousFocusRef.current = document.activeElement as HTMLElement;
+      const modalElement = modalRef.current;
+      if (modalElement) {
+        const focusableElements = modalElement.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusableElements.length > 0) {
+          focusableElements[0].focus();
+        }
+      }
+    } else if (previousFocusRef.current) {
+      previousFocusRef.current.focus();
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!isOpen) return;
+
+      if (e.key === 'Escape') {
+        onClose();
+        return;
+      }
+
+      if (e.key === 'Tab' && modalRef.current) {
+        const focusables = modalRef.current.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusables.length === 0) return;
+
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+
+        if (e.shiftKey) {
+          if (document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+          }
+        } else {
+          if (document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+          }
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
@@ -60,37 +115,52 @@ Disclaimer: ClariLex provides document literacy information and AI analysis, not
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div 
+      className="fixed inset-0 z-50 overflow-y-auto bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="export-modal-title"
+      aria-describedby="export-modal-desc"
+    >
       <div 
+        ref={modalRef}
         className="bg-white rounded-2xl shadow-2xl border border-stone-200 w-full max-w-3xl overflow-hidden animate-in fade-in zoom-in-95 duration-200"
         onClick={e => e.stopPropagation()}
       >
         {/* Modal Header */}
         <div className="px-6 py-4 border-b border-stone-200 flex items-center justify-between bg-stone-50 print:hidden">
-          <div className="flex items-center gap-2">
-            <FileText className="w-5 h-5 text-stone-700" />
-            <h2 className="font-serif text-lg font-bold text-stone-900">
-              Contract Audit & Analysis Report
-            </h2>
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-amber-500 text-stone-950 flex items-center justify-center font-bold">
+              <FileText className="w-4 h-4" />
+            </div>
+            <div>
+              <h2 id="export-modal-title" className="font-serif text-lg font-bold text-stone-900">
+                Export & Share Contract Audit Report
+              </h2>
+              <p id="export-modal-desc" className="text-xs text-stone-600">
+                Download printable PDF summaries or copy markdown reports for negotiations.
+              </p>
+            </div>
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={handleCopyMarkdown}
-              className="px-3 py-1.5 rounded-lg border border-stone-300 text-xs font-medium text-stone-700 hover:bg-stone-100 flex items-center gap-1.5 transition-colors"
+              className="px-3 py-1.5 rounded-lg border border-stone-300 text-xs font-medium text-stone-700 hover:bg-stone-100 flex items-center gap-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-900"
             >
               {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
               <span>{copied ? 'Copied MD!' : 'Copy Markdown'}</span>
             </button>
             <button
               onClick={handlePrint}
-              className="px-3 py-1.5 rounded-lg bg-stone-900 hover:bg-stone-800 text-white text-xs font-semibold flex items-center gap-1.5 transition-colors"
+              className="px-3 py-1.5 rounded-lg bg-stone-900 hover:bg-stone-800 text-white text-xs font-semibold flex items-center gap-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-900"
             >
               <Printer className="w-3.5 h-3.5" />
               <span>Print / Save PDF</span>
             </button>
             <button
               onClick={onClose}
-              className="p-1 rounded-lg text-stone-400 hover:text-stone-700 hover:bg-stone-200 transition-colors ml-2"
+              aria-label="Close export report dialog"
+              className="p-1 rounded-lg text-stone-500 hover:text-stone-800 hover:bg-stone-200 transition-colors ml-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-900"
             >
               <X className="w-5 h-5" />
             </button>
@@ -103,22 +173,22 @@ Disclaimer: ClariLex provides document literacy information and AI analysis, not
           <div className="border-b border-stone-300 pb-4">
             <div className="flex justify-between items-start">
               <div>
-                <span className="text-[10px] font-bold uppercase tracking-widest text-stone-400">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-stone-600">
                   ClariLex Contract Review Brief
                 </span>
                 <h1 className="font-serif text-2xl font-bold text-stone-900 mt-1">
                   {analysis.documentTitle}
                 </h1>
-                <p className="text-xs text-stone-500 mt-0.5">
+                <p className="text-xs text-stone-600 mt-0.5">
                   Category: {analysis.categoryDisplayName} • Date: {new Date().toLocaleDateString()}
                 </p>
               </div>
               <div className="text-right">
-                <span className="text-xs font-semibold text-stone-500 block">Health Score</span>
+                <span className="text-xs font-semibold text-stone-600 block">Health Score</span>
                 <span className="font-serif text-3xl font-bold text-stone-900">
                   {analysis.overallRiskScore}/100
                 </span>
-                <span className="text-[10px] uppercase font-bold text-amber-700 block">
+                <span className="text-[10px] uppercase font-bold text-amber-800 block">
                   {analysis.riskScoreLabel}
                 </span>
               </div>
@@ -167,7 +237,7 @@ Disclaimer: ClariLex provides document literacy information and AI analysis, not
           </div>
 
           {/* Ethics & Legal Aid Disclaimer */}
-          <div className="pt-4 border-t border-stone-200 text-[10px] text-stone-500 text-center">
+          <div className="pt-4 border-t border-stone-200 text-[10px] text-stone-600 text-center">
             ClariLex provides AI-powered document literacy and information, not formal legal advice. Consult a qualified attorney or local legal aid clinic for legal counsel before signing binding agreements.
           </div>
         </div>
@@ -175,3 +245,5 @@ Disclaimer: ClariLex provides document literacy information and AI analysis, not
     </div>
   );
 };
+
+export const ExportReportModal = React.memo(ExportReportModalComponent);

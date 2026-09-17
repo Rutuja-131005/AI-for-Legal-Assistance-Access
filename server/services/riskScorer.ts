@@ -12,7 +12,12 @@ export interface RiskScoreResult {
 }
 
 /**
- * Dynamically calculate risk score, label, and category breakdown.
+ * Calculates a normalized Health Safety Score (0-100 scale), risk tier classification label,
+ * and 4-axis category breakdown (Financial, Rights Protection, Exit Flexibility, Liability).
+ * 
+ * @param redFlags Array of identified contract red flags
+ * @param clauses Array of segmented contract clauses
+ * @returns RiskScoreResult containing score, label, and breakdown
  */
 export function calculateRiskScore(redFlags: RedFlag[], clauses: Clause[]): RiskScoreResult {
   const criticalCount = redFlags.filter(f => f.riskLevel === 'critical').length;

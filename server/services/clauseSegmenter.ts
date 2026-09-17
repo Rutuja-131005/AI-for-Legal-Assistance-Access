@@ -1,7 +1,13 @@
 import { Clause } from '../../src/types';
 
 /**
- * Segment raw contract text into structured clauses.
+ * Asynchronously or synchronously segments raw contract text into structured Clause objects.
+ * 
+ * Uses regex pattern matching and structural heuristics to identify clause headings,
+ * categories, risk levels, and plain-English translations.
+ * 
+ * @param text The full raw document text string
+ * @returns Array of segmented Clause domain models
  */
 export function segmentClauses(text: string): Clause[] {
   const lines = text.split('\n');

@@ -17,7 +17,7 @@ interface NegotiationDrafterViewProps {
   preselectedFlagId?: string;
 }
 
-export const NegotiationDrafterView: React.FC<NegotiationDrafterViewProps> = ({
+const NegotiationDrafterViewComponent: React.FC<NegotiationDrafterViewProps> = ({
   analysis,
   preselectedFlagId
 }) => {
@@ -303,3 +303,5 @@ export const NegotiationDrafterView: React.FC<NegotiationDrafterViewProps> = ({
     </div>
   );
 };
+
+export const NegotiationDrafterView = React.memo(NegotiationDrafterViewComponent);

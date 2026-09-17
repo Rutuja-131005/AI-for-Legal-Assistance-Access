@@ -1,4 +1,5 @@
 import express from 'express';
+import compression from 'compression';
 import path from 'path';
 import dotenv from 'dotenv';
 import { createServer as createViteServer } from 'vite';
@@ -31,6 +32,9 @@ dotenv.config();
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
+
+// Enable HTTP Gzip/Brotli compression for fast network transfers
+app.use(compression());
 
 // Apply Helmet security headers & CORS
 setupSecurityMiddleware(app);
@@ -300,7 +304,13 @@ async function startServer() {
     app.use(vite.middlewares);
   } else {
     const distPath = path.join(process.cwd(), 'dist');
-    app.use(express.static(distPath));
+    app.use(
+      express.static(distPath, {
+        maxAge: '1y',
+        immutable: true,
+        index: false,
+      })
+    );
     app.get('*', (req, res) => {
       res.sendFile(path.join(distPath, 'index.html'));
     });

@@ -16,7 +16,7 @@ interface RedFlagsListProps {
   onSelectForNegotiation?: (flagId: string) => void;
 }
 
-export const RedFlagsList: React.FC<RedFlagsListProps> = ({
+const RedFlagsListComponent: React.FC<RedFlagsListProps> = ({
   redFlags,
   onJumpToClause,
   onSelectForNegotiation
@@ -25,10 +25,12 @@ export const RedFlagsList: React.FC<RedFlagsListProps> = ({
   const [expandedId, setExpandedId] = useState<string | null>(redFlags[0]?.id || null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
-  const filteredFlags = redFlags.filter(flag => {
-    if (filter === 'all') return true;
-    return flag.riskLevel === filter;
-  });
+  const filteredFlags = React.useMemo(() => {
+    return redFlags.filter(flag => {
+      if (filter === 'all') return true;
+      return flag.riskLevel === filter;
+    });
+  }, [redFlags, filter]);
 
   const handleCopy = (id: string, text: string) => {
     navigator.clipboard.writeText(text);
@@ -232,3 +234,5 @@ export const RedFlagsList: React.FC<RedFlagsListProps> = ({
     </div>
   );
 };
+
+export const RedFlagsList = React.memo(RedFlagsListComponent);

@@ -5,7 +5,7 @@ interface RiskScoreCardProps {
   analysis: ContractAnalysis;
 }
 
-export const RiskScoreCard: React.FC<RiskScoreCardProps> = ({ analysis }) => {
+const RiskScoreCardComponent: React.FC<RiskScoreCardProps> = ({ analysis }) => {
   const score = analysis.overallRiskScore;
   const criticalCount = analysis.redFlags.filter(f => f.riskLevel === 'critical').length;
   const warningCount = analysis.redFlags.filter(f => f.riskLevel === 'warning').length;
@@ -120,3 +120,5 @@ export const RiskScoreCard: React.FC<RiskScoreCardProps> = ({ analysis }) => {
     </div>
   );
 };
+
+export const RiskScoreCard = React.memo(RiskScoreCardComponent);

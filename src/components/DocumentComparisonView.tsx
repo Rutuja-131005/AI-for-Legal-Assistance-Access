@@ -14,7 +14,7 @@ interface DocumentComparisonViewProps {
   currentAnalysis: ContractAnalysis;
 }
 
-export const DocumentComparisonView: React.FC<DocumentComparisonViewProps> = ({
+const DocumentComparisonViewComponent: React.FC<DocumentComparisonViewProps> = ({
   currentAnalysis
 }) => {
   const sampleMatch = SAMPLE_CONTRACTS.find(s => s.category === currentAnalysis.category);
@@ -214,19 +214,21 @@ export const DocumentComparisonView: React.FC<DocumentComparisonViewProps> = ({
           {/* Doc 2 (Counter-Offer / Revised) */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-stone-700">
-                Version 2: Counter-Proposal or Revised Draft
-              </span>
+              <label htmlFor="counter-proposal-text" className="text-xs font-bold uppercase tracking-wider text-stone-600 block">
+                2. Revised Counter-Proposal Draft (Proposed Version)
+              </label>
               <span className="text-[11px] text-emerald-600 font-medium">
                 Editable text below
               </span>
             </div>
             <textarea
+              id="counter-proposal-text"
               rows={12}
               value={counterText}
               onChange={e => setCounterText(e.target.value)}
               placeholder="Paste counter-proposal text or modify terms here to measure risk reduction..."
-              className="w-full text-xs font-mono p-3 bg-white border border-stone-300 rounded-xl text-stone-900 focus:outline-hidden focus:ring-1 focus:ring-stone-900"
+              aria-label="Revised Counter-Proposal Draft text"
+              className="w-full text-xs font-mono p-3 bg-white border border-stone-300 rounded-xl text-stone-900 focus:outline-hidden focus:ring-2 focus:ring-stone-900"
             />
           </div>
         </div>
@@ -234,3 +236,5 @@ export const DocumentComparisonView: React.FC<DocumentComparisonViewProps> = ({
     </div>
   );
 };
+
+export const DocumentComparisonView = React.memo(DocumentComparisonViewComponent);

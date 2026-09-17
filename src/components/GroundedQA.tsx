@@ -17,7 +17,7 @@ interface GroundedQAProps {
   onJumpToClause?: (clauseId: string) => void;
 }
 
-export const GroundedQA: React.FC<GroundedQAProps> = ({
+const GroundedQAComponent: React.FC<GroundedQAProps> = ({
   analysis,
   suggestedQuestions = [],
   onJumpToClause
@@ -48,14 +48,16 @@ This clause severely compromises your privacy. Under statutory tenant protection
     }
   ]);
 
-  const defaultSuggested = suggestedQuestions.length > 0 ? suggestedQuestions : [
-    'Can the landlord enter without advance notice?',
-    'What happens to my security deposit when I move out?',
-    'What are the penalties if I break the lease early?',
-    'Who pays for plumbing or HVAC maintenance?'
-  ];
+  const defaultSuggested = React.useMemo(() => {
+    return suggestedQuestions.length > 0 ? suggestedQuestions : [
+      'Can the landlord enter without advance notice?',
+      'What happens to my security deposit when I move out?',
+      'What are the penalties if I break the lease early?',
+      'Who pays for plumbing or HVAC maintenance?'
+    ];
+  }, [suggestedQuestions]);
 
-  const handleSubmitQuestion = async (queryText: string) => {
+  const handleSubmitQuestion = React.useCallback(async (queryText: string) => {
     if (!queryText.trim() || loading) return;
     setLoading(true);
 
@@ -64,7 +66,7 @@ This clause severely compromises your privacy. Under statutory tenant protection
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          question: queryText.trim(),
+          question: queryText,
           contractText: analysis.rawText,
           analysis
         })
@@ -74,131 +76,109 @@ This clause severely compromises your privacy. Under statutory tenant protection
       if (data.success) {
         const newQA: QuestionAnswer = {
           id: `qa-${Date.now()}`,
-          question: queryText.trim(),
+          question: queryText,
           answer: data.answer,
-          isGrounded: data.isGrounded !== false,
-          citedClauses: data.citedClauses || [],
-          confidence: data.confidence || 'high',
+          isGrounded: data.isGrounded,
+          citedClauses: data.citedClauses,
+          confidence: data.confidence,
           missingClauseWarning: data.missingClauseWarning,
-          timestamp: 'Just now'
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         };
+
         setQaHistory(prev => [newQA, ...prev]);
         setQuestion('');
-      } else {
-        throw new Error(data.error || 'Failed to get answer');
       }
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : String(err);
-      console.error('Q&A error:', message);
-      // Local fallback
-      const fallbackQA: QuestionAnswer = {
-        id: `qa-${Date.now()}`,
-        question: queryText.trim(),
-        answer: `This agreement does not explicitly state terms regarding "${queryText}". Default consumer protections and local statutes typically apply. We recommend asking the drafter to insert explicit language before signing.`,
-        isGrounded: false,
-        citedClauses: [],
-        confidence: 'medium',
-        missingClauseWarning: 'No direct clause match found in text.',
-        timestamp: 'Just now'
-      };
-      setQaHistory(prev => [fallbackQA, ...prev]);
-      setQuestion('');
+    } catch (err) {
+      console.error('Failed to answer question:', err);
     } finally {
       setLoading(false);
     }
-  };
+  }, [analysis, loading]);
 
   return (
     <div className="bg-white rounded-2xl p-6 border border-stone-200/90 shadow-xs space-y-6">
       {/* Header */}
       <div className="border-b border-stone-100 pb-4">
-        <div className="flex items-center gap-2">
-          <HelpCircle className="w-5 h-5 text-stone-700" />
-          <h2 className="font-serif text-lg font-bold text-stone-900">
-            Grounded Document Q&A Navigator
-          </h2>
-          <span className="text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full flex items-center gap-1">
-            <ShieldCheck className="w-3 h-3" />
-            <span>Anti-Hallucination Grounded</span>
-          </span>
-        </div>
-        <p className="text-xs text-stone-500 mt-1">
-          Ask any specific question about your obligations, penalties, or rights. Every answer cites verbatim clause quotes.
+        <h2 className="font-serif text-lg font-bold text-stone-900 flex items-center gap-2">
+          <HelpCircle className="w-5 h-5 text-amber-600" />
+          <span>Grounded Document Question & Answering (RAG)</span>
+        </h2>
+        <p className="text-xs text-stone-600 mt-0.5">
+          Ask any specific question about your rights, penalties, or restrictions. Answers are mathematically grounded in verbatim contract clauses.
         </p>
       </div>
 
-      {/* Suggested Question Chips */}
-      <div>
-        <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-2 flex items-center gap-1">
-          <Sparkles className="w-3 h-3 text-amber-600" />
-          <span>Suggested Questions for {analysis.categoryDisplayName}</span>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {defaultSuggested.map((qText, idx) => (
-            <button
-              key={idx}
-              onClick={() => handleSubmitQuestion(qText)}
-              disabled={loading}
-              className="text-left text-xs bg-stone-50 hover:bg-stone-100 border border-stone-200/80 hover:border-stone-300 text-stone-700 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5"
-            >
-              <span>{qText}</span>
-              <span className="text-stone-400 text-[10px]">↵</span>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Input Form */}
+      {/* Question Input Box */}
       <form
         onSubmit={e => {
           e.preventDefault();
           handleSubmitQuestion(question);
         }}
-        className="flex gap-2"
+        className="space-y-3"
       >
-        <div className="relative flex-1">
+        <div className="relative">
+          <label htmlFor="grounded-qa-input" className="sr-only">Ask a grounded question about this contract</label>
           <input
+            id="grounded-qa-input"
             type="text"
             value={question}
             onChange={e => setQuestion(e.target.value)}
-            placeholder="Ask a question about this contract (e.g. 'Can I have overnight guests?', 'What is the deposit refund timeline?')..."
-            className="w-full text-xs px-4 py-2.5 bg-stone-50/70 border border-stone-300 rounded-xl focus:outline-hidden focus:ring-1 focus:ring-stone-900 focus:bg-white"
-            disabled={loading}
+            placeholder="Ask anything, e.g. 'Can I sublet my apartment?' or 'What is the late fee?'"
+            aria-label="Ask a grounded question about this contract"
+            className="w-full text-xs sm:text-sm pl-4 pr-24 py-3 bg-stone-50 border border-stone-300 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-stone-900 focus:bg-white transition-all font-sans"
           />
+          <button
+            type="submit"
+            disabled={!question.trim() || loading}
+            aria-label="Submit question"
+            className="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-1.5 bg-stone-900 hover:bg-stone-800 text-white rounded-lg text-xs font-semibold disabled:opacity-40 transition-colors flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-900"
+          >
+            {loading ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <>
+                <span>Ask</span>
+                <Send className="w-3 h-3 text-amber-400" />
+              </>
+            )}
+          </button>
         </div>
-        <button
-          type="submit"
-          disabled={!question.trim() || loading}
-          className="px-4 py-2.5 rounded-xl bg-stone-900 hover:bg-stone-800 text-white text-xs font-semibold disabled:opacity-50 transition-colors flex items-center gap-1.5 shrink-0"
-        >
-          {loading ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
-          ) : (
-            <>
-              <span>Ask ClariLex</span>
-              <Send className="w-3.5 h-3.5" />
-            </>
-          )}
-        </button>
+
+        {/* Suggested Quick Questions */}
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-1">
+          <span className="text-[11px] font-bold text-stone-600 uppercase tracking-wider shrink-0 flex items-center gap-1">
+            <Sparkles className="w-3 h-3 text-amber-600" />
+            <span>Suggested Questions:</span>
+          </span>
+          {defaultSuggested.map((q, idx) => (
+            <button
+              key={idx}
+              type="button"
+              onClick={() => {
+                setQuestion(q);
+                handleSubmitQuestion(q);
+              }}
+              className="px-2.5 py-1 rounded-lg text-[11px] font-medium bg-stone-100 hover:bg-stone-200 text-stone-800 whitespace-nowrap transition-colors shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-900"
+            >
+              {q}
+            </button>
+          ))}
+        </div>
       </form>
 
-      {/* Q&A Thread History */}
-      <div className="space-y-4 pt-2">
+      {/* QA History Feed */}
+      <div className="space-y-4 pt-2 divide-y divide-stone-100">
         {qaHistory.map(qa => (
-          <div
-            key={qa.id}
-            className="p-5 rounded-xl border border-stone-200 bg-stone-50/30 space-y-3 animate-in fade-in"
-          >
-            {/* User Question */}
+          <div key={qa.id} className="pt-4 first:pt-0 space-y-2">
             <div className="flex items-start gap-2.5">
-              <div className="w-6 h-6 rounded-md bg-stone-900 text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
+              <div className="w-6 h-6 rounded-full bg-stone-900 text-amber-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
                 Q
               </div>
-              <div>
-                <h4 className="text-sm font-bold text-stone-900">
+              <div className="flex-1 flex items-center justify-between">
+                <h4 className="font-serif text-sm font-bold text-stone-900">
                   {qa.question}
                 </h4>
-                <span className="text-[10px] text-stone-400">{qa.timestamp}</span>
+                <span className="text-[10px] text-stone-500">{qa.timestamp}</span>
               </div>
             </div>
 
@@ -211,18 +191,18 @@ This clause severely compromises your privacy. Under statutory tenant protection
               {/* Cited Clauses Box */}
               {qa.citedClauses && qa.citedClauses.length > 0 && (
                 <div className="mt-3 p-3 rounded-lg bg-white border border-stone-200/90 space-y-1.5">
-                  <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500 flex items-center gap-1.5">
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-stone-600 flex items-center gap-1.5">
                     <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                     <span>Grounded Document Citations</span>
                   </div>
                   {qa.citedClauses.map((c, i) => (
                     <div key={i} className="text-xs font-mono text-stone-800 pl-2 border-l-2 border-stone-900">
                       <span className="font-bold">{c.clauseTitle}: </span>
-                      <span className="text-stone-600">"{c.quote}"</span>
+                      <span className="text-stone-700">"{c.quote}"</span>
                       {onJumpToClause && (
                         <button
                           onClick={() => onJumpToClause(c.clauseId)}
-                          className="ml-2 text-[10px] font-sans text-stone-700 underline hover:text-stone-950 inline-flex items-center gap-0.5"
+                          className="ml-2 text-[10px] font-sans text-stone-700 underline hover:text-stone-950 inline-flex items-center gap-0.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-stone-900"
                         >
                           View clause <ExternalLink className="w-2.5 h-2.5" />
                         </button>
@@ -234,7 +214,7 @@ This clause severely compromises your privacy. Under statutory tenant protection
 
               {/* Missing Clause Warning */}
               {qa.missingClauseWarning && (
-                <div className="mt-2 p-2.5 rounded-lg bg-amber-50 border border-amber-200 text-amber-900 text-[11px] flex items-center gap-2">
+                <div className="mt-2 p-2.5 rounded-lg bg-amber-50 border border-amber-200 text-amber-950 text-[11px] flex items-center gap-2">
                   <AlertCircle className="w-3.5 h-3.5 text-amber-700 shrink-0" />
                   <span>{qa.missingClauseWarning}</span>
                 </div>
@@ -246,3 +226,5 @@ This clause severely compromises your privacy. Under statutory tenant protection
     </div>
   );
 };
+
+export const GroundedQA = React.memo(GroundedQAComponent);
