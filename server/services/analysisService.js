@@ -1,5 +1,3 @@
-import crypto from 'crypto';
-
 import { detectDocumentCategory, getCategoryDisplayName } from './categoryDetector.js';
 import { segmentClauses } from './clauseSegmenter.js';
 import { identifyRedFlags } from './redFlagDetector.js';
@@ -11,6 +9,7 @@ import { generateExecutiveSummary } from './summaryGenerator.js';
 import { recordDocumentProcessing } from './metricsTracker.js';
 import { executeGroundedRAGQuery } from './ragPipeline.js';
 import { detectLanguageIntent, translateLegalExplanation } from './multilingualService.js';
+import { enhanceAnalysisWithAI, answerQuestionWithAI, getGeminiClient } from './aiAnalyzer.js';
 
 // Re-export sub-services for direct usage if needed
 export {
@@ -36,7 +35,13 @@ const analysisCache = new Map();
 const MAX_CACHE_SIZE = 100;
 
 function computeCacheKey(rawText, customTitle) {
-  return crypto.createHash('sha256').update((rawText || '') + (customTitle || '')).digest('hex');
+  const str = (rawText || '') + (customTitle || '');
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash << 5) - hash + str.charCodeAt(i);
+    hash |= 0;
+  }
+  return 'cache-' + Math.abs(hash);
 }
 
 /**
