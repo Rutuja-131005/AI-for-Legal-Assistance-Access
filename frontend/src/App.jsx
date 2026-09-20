@@ -89,6 +89,10 @@ export default function App() {
 
   return (
     <div className="app-container">
+      <a href="#main-content" className="skip-link">
+        Skip to main content
+      </a>
+
       <Header
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -96,7 +100,8 @@ export default function App() {
         apiKeyPresent={!!apiKey}
       />
 
-      <main className="main-content">
+      <main id="main-content" className="main-content" tabIndex="-1">
+
         <UploadZone onDocumentLoaded={handleDocumentLoaded} loading={loading} />
 
         {loading ? (
