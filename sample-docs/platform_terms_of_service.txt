@@ -1,0 +1,21 @@
+TERMS OF SERVICE AND USER SUBSCRIPTION AGREEMENT
+
+Last Updated: August 1, 2026
+Platform: FinTask App (Operated by CloudServices Inc.)
+
+1. ACCEPTANCE OF TERMS
+By accessing, registering, or using FinTask App ("Service"), you ("User") agree to be bound by these Terms of Service. If you do not agree, stop using the service immediately.
+
+2. UNILATERAL MODIFICATIONS
+CloudServices Inc. reserves the right to modify these Terms at any time without individual notice to Users. Continued use of the platform after updates constitutes binding acceptance of modified terms.
+
+3. USER DATA AND PRIVACY LICENSING
+3.1 Data Use: You grant CloudServices Inc. a worldwide, perpetual, royalty-free, transferable license to collect, analyze, monetize, and share your transactional and behavioral data with affiliated third-party advertising partners.
+3.2 Account Termination: CloudServices Inc. may terminate or suspend your account at any time for any reason without prior notice or refund of unused subscription credits.
+
+4. MANDATORY BINDING ARBITRATION AND CLASS ACTION WAIVER
+4.1 Binding Arbitration: All disputes, claims, or controversies arising out of this agreement shall be settled exclusively by individual binding arbitration rather than in court.
+4.2 Class Action Waiver: YOU AGREE THAT ANY CLAIMS MUST BE BROUGHT IN YOUR INDIVIDUAL CAPACITY AND NOT AS A PLAINTIFF OR CLASS MEMBER IN ANY PURPORTED CLASS OR REPRESENTATIVE PROCEEDING.
+
+5. LIMITATION OF LIABILITY
+In no event shall CloudServices Inc. be liable for any indirect, incidental, punitive, or consequential damages exceeding INR 1,000 (One Thousand Rupees) or the total fees paid by user in the preceding 1 month.

@@ -1,0 +1,190 @@
+:root {
+  --primary: #004243;
+  --primary-dark: #002e2f;
+  --primary-light: #0f5b5c;
+  --primary-accent: #aceeef;
+  
+  --bg-main: #f8f9ff;
+  --bg-surface: #ffffff;
+  --bg-subtle: #f2f3fa;
+  --border-color: #e1e2e9;
+
+  --text-main: #191c21;
+  --text-muted: #4f5959;
+  --text-inverse: #ffffff;
+
+  --risk-high-bg: #fff0f0;
+  --risk-high-border: #ffb4b4;
+  --risk-high-text: #b30000;
+
+  --risk-obligation-bg: #fff6ee;
+  --risk-obligation-border: #ffd6b3;
+  --risk-obligation-text: #9b4500;
+
+  --risk-standard-bg: #f0f8ff;
+  --risk-standard-border: #bce0ff;
+  --risk-standard-text: #0f5b5c;
+
+  --risk-favorable-bg: #f0faf4;
+  --risk-favorable-border: #b8ebd0;
+  --risk-favorable-text: #0e5138;
+
+  --font-serif: 'Newsreader', Georgia, serif;
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Typography Helpers */
+.font-serif {
+  font-family: var(--font-serif);
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+/* Base Layout Containers */
+.app-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-content {
+  flex: 1;
+  max-width: 1280px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+/* Cards & Panels */
+.clarilex-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+/* Buttons & Badges */
+.btn-primary {
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.65rem 1.25rem;
+  font-weight: 500;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background 0.2s ease;
+}
+
+.btn-primary:hover {
+  background: var(--primary-dark);
+}
+
+.btn-secondary {
+  background: white;
+  color: var(--primary);
+  border: 1px solid var(--primary);
+  border-radius: 6px;
+  padding: 0.65rem 1.25rem;
+  font-weight: 500;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+  background: #f0f9f9;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.badge-high-risk {
+  background: var(--risk-high-bg);
+  border: 1px solid var(--risk-high-border);
+  color: var(--risk-high-text);
+}
+
+.badge-obligation {
+  background: var(--risk-obligation-bg);
+  border: 1px solid var(--risk-obligation-border);
+  color: var(--risk-obligation-text);
+}
+
+.badge-standard {
+  background: var(--risk-standard-bg);
+  border: 1px solid var(--risk-standard-border);
+  color: var(--risk-standard-text);
+}
+
+.badge-favorable {
+  background: var(--risk-favorable-bg);
+  border: 1px solid var(--risk-favorable-border);
+  color: var(--risk-favorable-text);
+}
+
+/* Tabs */
+.nav-tabs {
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 1.5rem;
+}
+
+.nav-tab {
+  padding: 0.75rem 1.25rem;
+  font-weight: 500;
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s;
+}
+
+.nav-tab.active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+  font-weight: 600;
+}
+
+.nav-tab:hover:not(.active) {
+  color: var(--text-main);
+}
