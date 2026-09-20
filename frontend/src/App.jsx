@@ -20,16 +20,11 @@ export default function App() {
     checklist: SAMPLE_DOCUMENTS[0].checklist
   });
   const [loading, setLoading] = useState(false);
-  const [apiKey, setApiKey] = useState(localStorage.getItem('clarilex_gemini_key') || '');
+  const [apiKey, setApiKey] = useState('');
   const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
 
   const handleSaveApiKey = (key) => {
     setApiKey(key);
-    if (key) {
-      localStorage.setItem('clarilex_gemini_key', key);
-    } else {
-      localStorage.removeItem('clarilex_gemini_key');
-    }
   };
 
   const handleDocumentLoaded = async (loadedData) => {
@@ -54,17 +49,20 @@ export default function App() {
     // Call API server for live upload analysis if available
     setLoading(true);
     try {
+      const headers = { 'Content-Type': 'application/json' };
+      if (apiKey) headers['x-gemini-key'] = apiKey;
+
       const response = await fetch('/api/analyze', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({
           sessionId: loadedData.sessionId,
           text: loadedData.text,
-          filename: loadedData.filename,
-          apiKey
+          filename: loadedData.filename
         })
       });
       const data = await response.json();
+
 
       setDocSession({
         sessionId: loadedData.sessionId,

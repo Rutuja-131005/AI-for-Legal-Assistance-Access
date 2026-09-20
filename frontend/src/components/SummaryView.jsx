@@ -8,11 +8,11 @@ export default function SummaryView({ docData, classification, summary }) {
 
   if (!summary) {
     return (
-      <div className="clarilex-card" style={{ textAlign: 'center', padding: '3rem 1rem' }}>
-        <Info size={36} style={{ color: '#004243', marginBottom: '0.75rem' }} />
+      <section aria-label="Document Summary" className="clarilex-card" style={{ textAlign: 'center', padding: '3rem 1rem' }}>
+        <Info size={36} style={{ color: '#004243', marginBottom: '0.75rem' }} aria-hidden="true" />
         <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.2rem', margin: 0 }}>No Document Loaded Yet</h3>
         <p style={{ fontSize: '0.85rem', color: '#666' }}>Please select a sample document above or upload your agreement to view plain-language analysis.</p>
-      </div>
+      </section>
     );
   }
 
@@ -42,15 +42,15 @@ export default function SummaryView({ docData, classification, summary }) {
 
   const getTagIcon = (tag) => {
     switch (tag) {
-      case 'HIGH RISK': return <ShieldAlert size={14} />;
-      case 'OBLIGATION': return <AlertTriangle size={14} />;
-      case 'FAVORABLE': return <CheckCircle size={14} />;
-      default: return <Info size={14} />;
+      case 'HIGH RISK': return <ShieldAlert size={14} aria-hidden="true" />;
+      case 'OBLIGATION': return <AlertTriangle size={14} aria-hidden="true" />;
+      case 'FAVORABLE': return <CheckCircle size={14} aria-hidden="true" />;
+      default: return <Info size={14} aria-hidden="true" />;
     }
   };
 
   return (
-    <div>
+    <section aria-label="Document Summary & Analysis">
       {/* Classification Banner */}
       {classification && (
         <div style={{ background: '#004243', color: 'white', padding: '1rem 1.25rem', borderRadius: '8px', marginBottom: '1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
@@ -112,9 +112,10 @@ export default function SummaryView({ docData, classification, summary }) {
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
             {/* Search Box */}
             <div style={{ position: 'relative' }}>
-              <Search size={14} style={{ position: 'absolute', left: '0.6rem', top: '50%', transform: 'translateY(-50%)', color: '#888' }} />
+              <Search size={14} style={{ position: 'absolute', left: '0.6rem', top: '50%', transform: 'translateY(-50%)', color: '#888' }} aria-hidden="true" />
               <input
                 type="text"
+                aria-label="Search clauses by title or text"
                 placeholder="Search clauses..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -126,6 +127,8 @@ export default function SummaryView({ docData, classification, summary }) {
             {['ALL', 'HIGH RISK', 'OBLIGATION', 'FAVORABLE'].map((tag) => (
               <button
                 key={tag}
+                aria-label={`Filter by ${tag}`}
+                aria-pressed={riskFilter === tag}
                 onClick={() => setRiskFilter(tag)}
                 style={{
                   padding: '0.35rem 0.65rem',
@@ -145,7 +148,7 @@ export default function SummaryView({ docData, classification, summary }) {
         </div>
 
         {/* Clause List */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }} aria-live="polite">
           {filteredClauses.length === 0 ? (
             <p style={{ fontSize: '0.85rem', color: '#666', fontStyle: 'italic', padding: '1rem', textAlign: 'center' }}>No clauses matched your filter criteria.</p>
           ) : (
@@ -171,7 +174,7 @@ export default function SummaryView({ docData, classification, summary }) {
                       <strong style={{ fontSize: '0.95rem', color: '#191c21' }}>{clause.title}</strong>
                     </div>
 
-                    <span className={`badge ${getBadgeClass(clause.tag)}`}>
+                    <span className={`badge ${getBadgeClass(clause.tag)}`} role="status" aria-label={`Risk Tag: ${clause.tag}`}>
                       {getTagIcon(clause.tag)}
                       <span>{clause.tag}</span>
                     </span>
@@ -195,14 +198,16 @@ export default function SummaryView({ docData, classification, summary }) {
                   {/* Original Legal Text Accordion */}
                   <button
                     onClick={() => toggleExpand(clause.clauseId || idx)}
+                    aria-expanded={!!isExpanded}
+                    aria-controls={`clause-text-${clause.clauseId || idx}`}
                     style={{ background: 'transparent', border: 'none', color: '#4f5959', fontSize: '0.75rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem', marginTop: '0.25rem' }}
                   >
-                    {isExpanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+                    {isExpanded ? <ChevronUp size={12} aria-hidden="true" /> : <ChevronDown size={12} aria-hidden="true" />}
                     <span>{isExpanded ? 'Hide original legal text' : 'View original legal clause text'}</span>
                   </button>
 
                   {isExpanded && (
-                    <div style={{ marginTop: '0.5rem', padding: '0.65rem', background: '#f2f3fa', borderRadius: '4px', fontSize: '0.8rem', fontFamily: 'var(--font-serif)', color: '#444', fontStyle: 'italic', borderLeft: '2px solid #999' }}>
+                    <div id={`clause-text-${clause.clauseId || idx}`} style={{ marginTop: '0.5rem', padding: '0.65rem', background: '#f2f3fa', borderRadius: '4px', fontSize: '0.8rem', fontFamily: 'var(--font-serif)', color: '#444', fontStyle: 'italic', borderLeft: '2px solid #999' }}>
                       "{clause.originalText}"
                     </div>
                   )}
@@ -212,6 +217,6 @@ export default function SummaryView({ docData, classification, summary }) {
           )}
         </div>
       </div>
-    </div>
+    </section>
   );
 }

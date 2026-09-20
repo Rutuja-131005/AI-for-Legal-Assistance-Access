@@ -1,10 +1,12 @@
 # ClariLex — AI-Powered Legal Assistance & Document Navigator
 
 > **Track:** AI for Legal Assistance & Access  
+> **Live Demo:** [https://ai-for-legal-assistance-access-g85u-pi.vercel.app/](https://ai-for-legal-assistance-access-g85u-pi.vercel.app/)  
 > **Target Persona:** Riya — First-time renter, job seeker, or consumer signing a legal contract in India  
 > **Core Motto:** *Plain-language legal clarity without expensive consultation fees. Information, not legal advice.*
 
 ---
+
 
 ## ⚖️ Problem & Solution
 

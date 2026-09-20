@@ -1,12 +1,14 @@
 import express from 'express';
 import { generateLLMResponse } from '../services/llmClient.js';
 import { analysisCache } from '../services/analysisCache.js';
+import { ragStore } from '../services/ragEngine.js';
 
 const router = express.Router();
 
 router.post('/', async (req, res) => {
   try {
-    const { sessionId, apiKey, text, filename } = req.body;
+    const apiKey = req.headers['x-gemini-key'] || req.body?.apiKey;
+    const { sessionId, text, filename } = req.body;
     let documentData = ragStore.getDocument(sessionId);
     let fullText = text || (documentData ? documentData.fullText : '');
 

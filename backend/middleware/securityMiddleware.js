@@ -1,12 +1,44 @@
 /**
  * Comprehensive Security Middleware Suite
- * Includes Security Headers, Rate Limiter, and Prompt Injection Sanitizer
+ * Includes Security Headers, Rate Limiter, Scoped CORS, Input Sanitization & File Limits
  */
 
 // In-Memory Rate Limiter Store
 const rateLimitStore = new Map();
 const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
-const MAX_REQUESTS_PER_WINDOW = 150;
+const MAX_REQUESTS_PER_WINDOW = 100;
+
+const ALLOWED_ORIGINS = [
+  'https://ai-for-legal-assistance-access-seven.vercel.app',
+  'http://localhost:3000',
+  'http://localhost:5173',
+  'http://localhost:3001'
+];
+
+/**
+ * Scoped CORS Middleware
+ */
+export function scopedCors(req, res, next) {
+  const origin = req.headers.origin;
+
+  if (!origin) {
+    // Same-origin or non-browser requests
+    res.setHeader('Access-Control-Allow-Origin', '*');
+  } else if (ALLOWED_ORIGINS.includes(origin) || /\.vercel\.app$/.test(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  } else {
+    res.setHeader('Access-Control-Allow-Origin', ALLOWED_ORIGINS[0]);
+  }
+
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-gemini-key');
+
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
+  next();
+}
 
 /**
  * Security HTTP Headers Middleware (CSP, HSTS, X-Frame-Options, X-Content-Type-Options)
@@ -25,7 +57,7 @@ export function securityHeaders(req, res, next) {
 }
 
 /**
- * IP Rate Limiting Middleware
+ * IP Rate Limiting Middleware (100 req per 15 min)
  */
 export function rateLimiter(req, res, next) {
   const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
@@ -55,12 +87,24 @@ export function rateLimiter(req, res, next) {
 }
 
 /**
+ * Input Payload & File Size Validation Middleware
+ */
+export function validateInputPayload(req, res, next) {
+  if (req.body && req.body.text && typeof req.body.text === 'string') {
+    // 5MB text length check (~5 million chars)
+    if (req.body.text.length > 5 * 1024 * 1024) {
+      return res.status(400).json({ error: 'Document exceeds maximum allowed text size limit of 5MB.' });
+    }
+  }
+  next();
+}
+
+/**
  * Sanitizes user input against prompt injection and malicious script vectors
  */
 export function sanitizeInput(input) {
   if (typeof input !== 'string') return input;
 
-  // Patterns for prompt injection attacks
   const promptInjectionPatterns = [
     /ignore\s+previous\s+instructions/gi,
     /system\s*:\s*/gi,
@@ -74,7 +118,6 @@ export function sanitizeInput(input) {
     sanitized = sanitized.replace(pattern, '[BLOCKED_INJECTION]');
   }
 
-  // Basic HTML/XSS sanitization
   sanitized = sanitized
     .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
     .replace(/javascript:/gi, '');

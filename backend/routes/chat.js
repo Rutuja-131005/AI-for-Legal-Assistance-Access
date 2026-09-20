@@ -6,7 +6,8 @@ const router = express.Router();
 
 router.post('/', async (req, res) => {
   try {
-    const { sessionId, question, apiKey } = req.body;
+    const apiKey = req.headers['x-gemini-key'] || req.body?.apiKey;
+    const { sessionId, question } = req.body;
     if (!question) {
       return res.status(400).json({ error: 'Question parameter is required.' });
     }
