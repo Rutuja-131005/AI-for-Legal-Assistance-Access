@@ -7,7 +7,7 @@
     "dev": "npm --prefix frontend run dev",
     "build": "npm --prefix frontend install && npm --prefix frontend run build",
     "start": "npm --prefix backend start",
-    "test": "node tests/parser.test.js && node tests/rag.test.js"
+    "test": "node --env-file=.env.test tests/parser.test.js && node tests/rag.test.js && node tests/security.test.js && node tests/cache.test.js && node tests/api.test.js"
   },
   "dependencies": {
     "express": "^4.19.2"

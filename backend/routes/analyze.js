@@ -1,6 +1,6 @@
 import express from 'express';
 import { generateLLMResponse } from '../services/llmClient.js';
-import { ragStore } from '../services/ragEngine.js';
+import { analysisCache } from '../services/analysisCache.js';
 
 const router = express.Router();
 
@@ -12,6 +12,16 @@ router.post('/', async (req, res) => {
 
     if (!fullText) {
       return res.status(400).json({ error: 'No document text found for session.' });
+    }
+
+    // Check Cache
+    const cachedResult = analysisCache.get(fullText, { filename });
+    if (cachedResult) {
+      return res.json({
+        sessionId,
+        cached: true,
+        ...cachedResult
+      });
     }
 
     // Step 1: Detect Document Type
@@ -28,11 +38,15 @@ router.post('/', async (req, res) => {
       expectedJson: true
     });
 
+    const result = { classification, summary: analysis };
+    analysisCache.set(fullText, { filename }, result);
+
     res.json({
       sessionId,
-      classification,
-      summary: analysis
+      cached: false,
+      ...result
     });
+
   } catch (error) {
     console.error('Analyze Error:', error);
     res.status(500).json({ error: 'Failed to analyze document: ' + error.message });
