@@ -18,6 +18,11 @@ GROUNDING & MODAL VERB RULES:
 1. Preserve modal verb semantics exactly: 'shall' and 'must' mean mandatory obligations; 'may' means permissive rights; 'unless' and 'subject to' mean conditional exceptions.
 2. Anti-hallucination rule: If information is absent from the document, explicitly output: "This information is not specified in the uploaded document."
 3. Calibrate language to non-definitive legal statements ("The document states...", "Clause X indicates...") rather than absolute legal conclusions.
+4. CLAUSE INTERPRETATION & RISK EXPLANATION RULES:
+   Strictly separate:
+   a) What the clause says: Directly grounded in the retrieved document text.
+   b) What it means for the tenant/signer: A reasonable, factual, and mathematically calculated interpretation (e.g. "Your monthly rent would increase by ₹4,200, from ₹35,000 to ₹39,200, if the 12% escalation applies at renewal").
+   c) External market assessment: NEVER speculate on external market inflation rates (e.g. do NOT say "12% is higher than market rate" or "severe penalty"). Keep explanations objective and grounded strictly in the document terms.
 `;
 
   const finalSystemInstruction = `${securityBoundaryInstruction}\n${systemInstruction || ''}`.trim();
@@ -398,7 +403,7 @@ function getSampleRentalSummary() {
         originalText: 'LOCK-IN PERIOD: Both parties agree to a mandatory Lock-in Period of 6 (six) months. If the Tenant vacates prior to completion, the Tenant shall forfeit the entire Security Deposit...',
         simplifiedText: 'You cannot leave the house during the first 6 months. If you move out early, the landlord will take your entire INR 3,50,000 security deposit.',
         tag: 'HIGH RISK',
-        reason: 'Severe penalty of losing 10 months rent if job or living situation changes early.'
+        reason: 'Leaving before the 6-month lock-in period may trigger an early-termination financial obligation. Check the agreement for the exact amount or penalty applicable.'
       },
       {
         clauseId: '2.4',
@@ -406,7 +411,7 @@ function getSampleRentalSummary() {
         originalText: 'Upon termination, the Landlord reserves the absolute right to deduct 1 (one) full month\'s rent (INR 35,000) for mandatory painting...',
         simplifiedText: 'When you move out, the landlord will automatically deduct INR 35,000 from your deposit for painting, even if the walls are perfectly clean.',
         tag: 'HIGH RISK',
-        reason: 'Non-negotiable automatic deduction regardless of actual wear and tear.'
+        reason: '1 full month rent (INR 35,000) will be automatically deducted from your security deposit upon move out.'
       },
       {
         clauseId: '3.1',
@@ -414,7 +419,7 @@ function getSampleRentalSummary() {
         originalText: 'In the event of renewal after 11 months, monthly rent shall automatically increase by 12% per annum...',
         simplifiedText: 'If you renew the agreement next year, your rent will jump from INR 35,000 to INR 39,200 per month.',
         tag: 'OBLIGATION',
-        reason: '12% is higher than the standard 5-10% market inflation rate in Bengaluru.'
+        reason: 'Your monthly rent would increase by ₹4,200, from ₹35,000 to ₹39,200, if the 12% escalation applies at renewal.'
       },
       {
         clauseId: '5.1',
@@ -422,7 +427,7 @@ function getSampleRentalSummary() {
         originalText: 'Post completion of Lock-in Period, either party may terminate by giving 2 months written notice...',
         simplifiedText: 'After the initial 6 months, you must inform the landlord 2 months in advance before moving out.',
         tag: 'STANDARD',
-        reason: 'Standard 2-month notice period common in residential leases.'
+        reason: 'Requires providing 2 full calendar months of advance written notice prior to vacating.'
       }
     ]
   };
@@ -444,7 +449,7 @@ function getSampleEmploymentSummary() {
         originalText: 'The Employee must serve a mandatory 90 (ninety) days written notice period prior to resignation...',
         simplifiedText: 'If you want to resign, you must work for 3 full months after submitting your resignation.',
         tag: 'HIGH RISK',
-        reason: 'Long notice period can make joining future employers difficult.'
+        reason: 'A 90-day notice period requires 3 months of advance notice before contract termination.'
       },
       {
         clauseId: '3.1',
@@ -452,7 +457,7 @@ function getSampleEmploymentSummary() {
         originalText: 'For 12 months post termination, Employee agrees not to accept employment with any competing entity in South Asia...',
         simplifiedText: 'You agree not to work for any competitor in South Asia for 1 year after leaving this company.',
         tag: 'HIGH RISK',
-        reason: 'Restricts future career moves, although Indian courts generally disfavor non-competes.'
+        reason: 'This clause restricts taking employment with direct industry competitors for 12 months after termination.'
       },
       {
         clauseId: '1.3',
@@ -460,7 +465,7 @@ function getSampleEmploymentSummary() {
         originalText: 'If Employee resigns within 18 months, full Joining Bonus of INR 2,00,000 must be refunded within 15 days...',
         simplifiedText: 'If you leave within 1.5 years, you must return the INR 2,00,000 joining bonus immediately.',
         tag: 'OBLIGATION',
-        reason: 'Long clawback duration of 18 months.'
+        reason: 'Requires full refund of INR 2,00,000 joining bonus if resignation occurs within 18 months.'
       }
     ]
   };
