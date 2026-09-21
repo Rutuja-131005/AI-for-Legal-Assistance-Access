@@ -6,7 +6,6 @@ import GroundedChat from './components/GroundedChat';
 import CompareView from './components/CompareView';
 import ChecklistView from './components/ChecklistView';
 import Disclaimer from './components/Disclaimer';
-import ApiKeyModal from './components/ApiKeyModal';
 import { SAMPLE_DOCUMENTS } from './data/sampleDocs';
 
 export default function App() {
@@ -20,12 +19,6 @@ export default function App() {
     checklist: SAMPLE_DOCUMENTS[0].checklist
   });
   const [loading, setLoading] = useState(false);
-  const [apiKey, setApiKey] = useState('');
-  const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
-
-  const handleSaveApiKey = (key) => {
-    setApiKey(key);
-  };
 
   const handleDocumentLoaded = async (loadedData) => {
     if (loadedData.loading) {
@@ -46,15 +39,12 @@ export default function App() {
       return;
     }
 
-    // Call API server for live upload analysis if available
+    // Call API server for live upload analysis
     setLoading(true);
     try {
-      const headers = { 'Content-Type': 'application/json' };
-      if (apiKey) headers['x-gemini-key'] = apiKey;
-
       const response = await fetch('/api/analyze', {
         method: 'POST',
-        headers,
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           sessionId: loadedData.sessionId,
           text: loadedData.text,
@@ -62,7 +52,6 @@ export default function App() {
         })
       });
       const data = await response.json();
-
 
       setDocSession({
         sessionId: loadedData.sessionId,
@@ -96,8 +85,6 @@ export default function App() {
       <Header
         activeTab={activeTab}
         setActiveTab={setActiveTab}
-        onOpenApiKeyModal={() => setIsApiKeyModalOpen(true)}
-        apiKeyPresent={!!apiKey}
       />
 
       <main id="main-content" className="main-content" tabIndex="-1">
@@ -124,13 +111,12 @@ export default function App() {
             {activeTab === 'chat' && (
               <GroundedChat
                 sessionId={docSession.sessionId}
-                apiKey={apiKey}
                 docText={docSession.text}
               />
             )}
 
             {activeTab === 'compare' && (
-              <CompareView apiKey={apiKey} />
+              <CompareView />
             )}
 
             {activeTab === 'checklist' && (
@@ -144,13 +130,6 @@ export default function App() {
       </main>
 
       <Disclaimer />
-
-      <ApiKeyModal
-        isOpen={isApiKeyModalOpen}
-        onClose={() => setIsApiKeyModalOpen(false)}
-        apiKey={apiKey}
-        onSaveApiKey={handleSaveApiKey}
-      />
     </div>
   );
 }

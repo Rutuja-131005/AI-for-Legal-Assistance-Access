@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { GitCompare, CheckCircle2, AlertTriangle, ArrowRight } from 'lucide-react';
 import { SAMPLE_DOCUMENTS } from '../data/sampleDocs';
 
-export default function CompareView({ apiKey }) {
+export default function CompareView() {
   const [docA, setDocA] = useState(SAMPLE_DOCUMENTS[0]);
   const [docB, setDocB] = useState(SAMPLE_DOCUMENTS[1] || SAMPLE_DOCUMENTS[0]);
   const [comparing, setComparing] = useState(false);
@@ -18,8 +18,7 @@ export default function CompareView({ apiKey }) {
           docAText: docA.text,
           docBText: docB.text,
           docAName: docA.title,
-          docBName: docB.title,
-          apiKey
+          docBName: docB.title
         })
       });
       const data = await response.json();

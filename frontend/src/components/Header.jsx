@@ -1,7 +1,7 @@
 import React from 'react';
-import { Shield, Key, FileText, MessageSquare, GitCompare, CheckSquare, Lock } from 'lucide-react';
+import { FileText, MessageSquare, GitCompare, CheckSquare } from 'lucide-react';
 
-export default function Header({ activeTab, setActiveTab, onOpenApiKeyModal, apiKeyPresent }) {
+export default function Header({ activeTab, setActiveTab }) {
   const tabs = [
     { id: 'summary', label: 'Document & Summary', icon: FileText },
     { id: 'chat', label: 'Grounded Q&A (RAG)', icon: MessageSquare },
@@ -23,29 +23,6 @@ export default function Header({ activeTab, setActiveTab, onOpenApiKeyModal, api
 
   return (
     <header style={{ background: '#ffffff', borderBottom: '1px solid #e1e2e9' }} role="banner">
-      {/* Top Utility Bar */}
-      <div style={{ background: '#004243', color: '#ffffff', padding: '0.4rem 1.5rem', fontSize: '0.8rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', background: 'rgba(255,255,255,0.15)', padding: '0.15rem 0.6rem', borderRadius: '4px' }}>
-            <Shield size={12} aria-hidden="true" />
-            <span>Target Persona: <strong>Riya (First-Time Consumer / Renter)</strong></span>
-          </span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: '#aceeef' }}>
-            <Lock size={12} aria-hidden="true" />
-            <span>Session-Only Privacy Active</span>
-          </span>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <button
-            onClick={onOpenApiKeyModal}
-            aria-label="Configure Gemini API key"
-            style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.3)', color: 'white', borderRadius: '4px', padding: '0.2rem 0.6rem', fontSize: '0.75rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.35rem' }}
-          >
-            <Key size={12} aria-hidden="true" />
-            <span>{apiKeyPresent ? 'Gemini API Connected' : 'Configure Gemini API'}</span>
-          </button>
-        </div>
-      </div>
 
       {/* Main Branding Bar */}
       <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '1.25rem 1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
