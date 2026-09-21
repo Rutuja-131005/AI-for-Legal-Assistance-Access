@@ -12,6 +12,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('summary');
   const [docSession, setDocSession] = useState({
     sessionId: `sample-${SAMPLE_DOCUMENTS[0].id}`,
+    document_id: `DOC_SAMPLE_${SAMPLE_DOCUMENTS[0].id}`,
     filename: SAMPLE_DOCUMENTS[0].filename,
     text: SAMPLE_DOCUMENTS[0].text,
     classification: SAMPLE_DOCUMENTS[0].classification,
@@ -29,6 +30,7 @@ export default function App() {
     if (loadedData.sampleData) {
       setDocSession({
         sessionId: `sample-${loadedData.sampleData.id}`,
+        document_id: `DOC_SAMPLE_${loadedData.sampleData.id}`,
         filename: loadedData.sampleData.filename,
         text: loadedData.sampleData.text,
         classification: loadedData.sampleData.classification,
@@ -47,6 +49,7 @@ export default function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           sessionId: loadedData.sessionId,
+          document_id: loadedData.document_id,
           text: loadedData.text,
           filename: loadedData.filename
         })
@@ -55,6 +58,7 @@ export default function App() {
 
       setDocSession({
         sessionId: loadedData.sessionId,
+        document_id: data.document_id || loadedData.document_id || `DOC_${Date.now()}`,
         filename: loadedData.filename,
         text: loadedData.text,
         classification: data.classification || { documentType: 'Uploaded Agreement', confidence: 0.9 },
@@ -65,6 +69,7 @@ export default function App() {
       console.warn('API analysis call failed, applying client analysis fallback:', err);
       setDocSession({
         sessionId: loadedData.sessionId,
+        document_id: loadedData.document_id || `DOC_${Date.now()}`,
         filename: loadedData.filename,
         text: loadedData.text,
         classification: SAMPLE_DOCUMENTS[0].classification,
@@ -111,6 +116,7 @@ export default function App() {
             {activeTab === 'chat' && (
               <GroundedChat
                 sessionId={docSession.sessionId}
+                document_id={docSession.document_id}
                 docText={docSession.text}
               />
             )}

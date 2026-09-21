@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Send, Shield, Sparkles, MessageSquare, Bot, User, Bookmark } from 'lucide-react';
 
-export default function GroundedChat({ sessionId, docText }) {
+export default function GroundedChat({ sessionId, document_id, docText }) {
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
@@ -34,6 +34,7 @@ export default function GroundedChat({ sessionId, docText }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           sessionId,
+          document_id,
           question: q
         })
       });

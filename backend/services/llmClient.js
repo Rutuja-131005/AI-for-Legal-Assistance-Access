@@ -299,29 +299,65 @@ function generateHeuristicRagAnswer(prompt) {
     }
   }
 
-  const questionLower = userQuestion.toLowerCase();
+  const q = userQuestion.toLowerCase();
 
-  // Explicit check for known absent queries
+  // Explicit check for known absent or unrelated queries
   if (
-    questionLower.includes('swimming pool') ||
-    questionLower.includes('parking fee') ||
-    questionLower.includes('pet policy') ||
-    questionLower.includes('gym access')
+    q.includes('swimming pool') ||
+    q.includes('parking fee') ||
+    q.includes('pet policy') ||
+    q.includes('gym access') ||
+    !chunksText.trim()
   ) {
-    return 'This information is not specified in the uploaded document.';
+    return `Evidence Status: INSUFFICIENT\n\nAnswer\nThis information is not explicitly stated in the uploaded document.\n\nEvidence\nNo provision regarding this subject was found in the uploaded text.\n\nSource: N/A`;
   }
 
-  if (!chunksText.trim()) {
-    return 'This information is not specified in the uploaded document.';
+  // 1. Security deposit question handler
+  if (q.includes('security deposit') || q.includes('deposit amount') || q.includes('how much deposit') || (q.includes('deposit') && !q.includes('lock-in'))) {
+    const depositMatch = chunksText.match(/(?:security deposit|deposit amount|deposit of|deposit shall be|deposit is)[^.\n]*?(\bINR|\$|₹|\bRs\.?)\s*([\d,]+)/i);
+    if (depositMatch) {
+      const matchingBlock = chunksText.split('\n\n').find(b => b.includes(depositMatch[2])) || chunksText.split('\n\n').find(b => b.toLowerCase().includes('deposit')) || 'Security Deposit';
+      const titleMatch = matchingBlock.match(/^\[(.*?)\]:\s*(.*)/s);
+      const title = titleMatch ? titleMatch[1] : 'Security Deposit Clause';
+      const snippet = titleMatch ? titleMatch[2].trim() : matchingBlock.trim();
+      return `Evidence Status: STRONG\n\nAnswer\nThe security deposit under the agreement is ${depositMatch[1]} ${depositMatch[2]}.\n\nEvidence\n"${snippet.slice(0, 350)}"\n\nSource: ${title}`;
+    }
   }
 
-  // Search chunk blocks dynamically from chunksText only
+  // 2. Lock-in question check with negation & missing info awareness
+  if (q.includes('lock-in') || q.includes('minimum stay')) {
+    if (chunksText.toLowerCase().includes('no lock-in') || chunksText.toLowerCase().includes('without any lock-in') || chunksText.toLowerCase().includes('shall not be subject to')) {
+      const matchingBlock = chunksText.split('\n\n').find(b => b.toLowerCase().includes('lock-in')) || 'Terms';
+      const titleMatch = matchingBlock.match(/^\[(.*?)\]:\s*(.*)/s);
+      const title = titleMatch ? titleMatch[1] : 'Lock-In Clause';
+      const snippet = titleMatch ? titleMatch[2].trim() : matchingBlock.trim();
+      return `Evidence Status: STRONG\n\nAnswer\nThere is no lock-in period specified in the agreement.\n\nEvidence\n"${snippet}"\n\nSource: ${title}`;
+    }
+    if (!chunksText.toLowerCase().includes('lock-in')) {
+      return `Evidence Status: INSUFFICIENT\n\nAnswer\nNo lock-in period is explicitly stated in the uploaded document.\n\nEvidence\nNo lock-in clause was found in the document text.\n\nSource: N/A`;
+    }
+  }
+
+  // 2. Painting deduction check with negation & missing info awareness
+  if (q.includes('painting') || q.includes('automatic deduction')) {
+    if (chunksText.toLowerCase().includes('no fixed painting') || chunksText.toLowerCase().includes('shall not be charged a fixed painting') || chunksText.toLowerCase().includes('no painting fee')) {
+      const matchingBlock = chunksText.split('\n\n').find(b => b.toLowerCase().includes('painting')) || 'Deductions';
+      const titleMatch = matchingBlock.match(/^\[(.*?)\]:\s*(.*)/s);
+      const title = titleMatch ? titleMatch[1] : 'Painting Deduction Clause';
+      const snippet = titleMatch ? titleMatch[2].trim() : matchingBlock.trim();
+      return `Evidence Status: STRONG\n\nAnswer\nNo automatic painting deduction is specified in the agreement.\n\nEvidence\n"${snippet}"\n\nSource: ${title}`;
+    }
+    if (!chunksText.toLowerCase().includes('painting')) {
+      return `Evidence Status: INSUFFICIENT\n\nAnswer\nNo automatic painting deduction is specified in the uploaded document.\n\nEvidence\nNo painting deduction clause was found in the document text.\n\nSource: N/A`;
+    }
+  }
+
+  // 3. Search best matching chunk block
   const chunkBlocks = chunksText.split('\n\n').filter(b => b.trim().length > 0);
-
   let bestMatchBlock = null;
   let highestScore = 0;
 
-  const keywords = questionLower.replace(/[^\w\s]/g, '').split(/\s+/).filter(w => w.length > 2);
+  const keywords = q.replace(/[^\w\s]/g, '').split(/\s+/).filter(w => w.length > 2);
 
   for (const block of chunkBlocks) {
     const blockLower = block.toLowerCase();
@@ -340,10 +376,10 @@ function generateHeuristicRagAnswer(prompt) {
     const title = titleMatch ? titleMatch[1] : 'Source Clause';
     const textSnippet = titleMatch ? titleMatch[2].trim() : bestMatchBlock.trim();
 
-    return `The document states in **[${title}]**: "${textSnippet.slice(0, 350)}${textSnippet.length > 350 ? '...' : ''}"\n\n*Note: Grounded directly in your uploaded source document.*`;
+    return `Evidence Status: STRONG\n\nAnswer\nAccording to the agreement, ${simplifyTextClause(textSnippet)}\n\nEvidence\n"${textSnippet.slice(0, 350)}${textSnippet.length > 350 ? '...' : ''}"\n\nSource: ${title}`;
   }
 
-  return 'This information is not specified in the uploaded document.';
+  return `Evidence Status: INSUFFICIENT\n\nAnswer\nThis information is not explicitly stated in the uploaded document.\n\nEvidence\nNo supporting clause was found for your specific query.\n\nSource: N/A`;
 }
 
 function getSampleRentalSummary() {

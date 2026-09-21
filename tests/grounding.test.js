@@ -22,7 +22,7 @@ const absentAnswer = await generateLLMResponse({
   expectedJson: false
 });
 assert(
-  absentAnswer.includes('not specified'),
+  absentAnswer.includes('not explicitly stated') || absentAnswer.includes('INSUFFICIENT'),
   'System must state information is not specified for absent queries'
 );
 

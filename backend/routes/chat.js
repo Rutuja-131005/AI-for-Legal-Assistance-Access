@@ -7,28 +7,38 @@ const router = express.Router();
 router.post('/', async (req, res) => {
   try {
     const apiKey = req.headers['x-gemini-key'] || req.body?.apiKey;
-    const { sessionId, question } = req.body;
+    const { sessionId, document_id, question } = req.body;
     if (!question) {
       return res.status(400).json({ error: 'Question parameter is required.' });
     }
 
-    const relevantChunks = ragStore.search(sessionId, question, 4);
-    const chunkContext = relevantChunks.map(c => `[${c.title}]: ${c.text}`).join('\n\n');
+    const docSession = ragStore.getDocument(sessionId);
+    const activeDocId = document_id || (docSession ? docSession.document_id : null);
 
-    const prompt = `DOCUMENT CHUNKS:\n${chunkContext}\n\nUSER QUESTION:\n${question}`;
-    const systemInstruction = 'You are ClariLex RAG Engine. Answer grounded ONLY in the chunks provided. Cite source clauses.';
+    const relevantChunks = ragStore.search(sessionId, question, { topK: 4, document_id: activeDocId });
+    const chunkContext = relevantChunks.map(c => `[${c.clause_title || c.title}]: ${c.text}`).join('\n\n');
+
+    const prompt = `DOCUMENT ID: ${activeDocId || 'ACTIVE'}\nDOCUMENT CHUNKS:\n${chunkContext}\n\nUSER QUESTION:\n${question}`;
+    const systemInstruction = 'You are ClariLex RAG Engine. Answer grounded ONLY in the currently active document chunks provided. Never assume or cite information from other documents. If information is missing, state it is not in the document.';
 
     const answer = await generateLLMResponse({
       prompt,
       apiKey,
       systemInstruction,
-      expectedJson: false
+      expectedJson: false,
+      sessionId,
+      document_id: activeDocId
     });
 
     res.json({
       question,
       answer,
-      citations: relevantChunks.map(c => ({ id: c.id, title: c.title }))
+      document_id: activeDocId,
+      citations: relevantChunks.map(c => ({
+        id: c.chunk_id || c.id,
+        clause_number: c.clause_number,
+        title: c.clause_title || c.title
+      }))
     });
   } catch (error) {
     console.error('Chat Error:', error);
