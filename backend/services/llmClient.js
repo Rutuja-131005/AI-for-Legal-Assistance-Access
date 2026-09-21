@@ -139,6 +139,21 @@ function fallbackHeuristicEngine(prompt, expectedJson) {
 
   // Action Checklist
   if (promptLower.includes('action checklist')) {
+    return generateHeuristicActionChecklist(prompt);
+  }
+
+  return expectedJson ? {} : 'Analysis completed successfully.';
+}
+
+function generateHeuristicActionChecklist(prompt) {
+  let docText = prompt;
+  if (prompt.includes('<<<UNTRUSTED_DOCUMENT_CONTENT>>>')) {
+    docText = prompt.split('<<<UNTRUSTED_DOCUMENT_CONTENT>>>')[1]?.split('<<</UNTRUSTED_DOCUMENT_CONTENT>>>')[0] || prompt;
+  }
+  const p = docText.toLowerCase();
+
+  // Standard sample rentals
+  if (p.includes('indiranagar') || p.includes('suresh kumar')) {
     return {
       verifyItems: [
         'Verify property ownership title deeds / landlord identity before paying deposit',
@@ -157,7 +172,41 @@ function fallbackHeuristicEngine(prompt, expectedJson) {
     };
   }
 
-  return expectedJson ? {} : 'Analysis completed successfully.';
+  // Dynamic items for custom uploaded text
+  const verifyItems = [
+    'Verify counterparty legal identity and signing authority before executing agreement',
+    'Confirm all oral representations are explicitly written into the contract clauses',
+    'Verify effective start date, key milestone obligations, and renewal terms'
+  ];
+  const negotiateItems = [];
+  const lawyerItems = [];
+
+  if (p.includes('deposit') || p.includes('lock-in') || p.includes('forfeit') || p.includes('penalty')) {
+    negotiateItems.push('Negotiate a fair cap on mandatory forfeiture of deposit or advance payments upon early exit.');
+    lawyerItems.push('Consult a legal professional regarding statutory protections against illegal penalty or forfeiture clauses.');
+  }
+
+  if (p.includes('notice') || p.includes('termination')) {
+    negotiateItems.push('Request mutual notice period duration for both parties upon contract termination.');
+    lawyerItems.push('Ask a legal professional whether the specified notice period aligns with standard statutory norms.');
+  }
+
+  if (p.includes('non-compete') || p.includes('indemnity') || p.includes('liability')) {
+    negotiateItems.push('Seek to cap liability to direct actual fees paid and exclude indirect/consequential damages.');
+    lawyerItems.push('Seek legal counsel to review the enforceability of broad non-compete or unlimited indemnity clauses.');
+  }
+
+  if (negotiateItems.length === 0) {
+    negotiateItems.push('Clarify ambiguity in payment schedule or service deliverables before signing.');
+    negotiateItems.push('Request explicit written confirmation of renewal notice timelines.');
+  }
+
+  if (lawyerItems.length === 0) {
+    lawyerItems.push('Have a qualified attorney review liability assignment and governing jurisdiction clauses.');
+    lawyerItems.push('Verify dispute resolution mechanism (Arbitration vs Court Jurisdiction) with legal counsel.');
+  }
+
+  return { verifyItems, negotiateItems, lawyerItems };
 }
 
 function generateHeuristicSummaryAndRisks(prompt) {

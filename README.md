@@ -27,7 +27,26 @@ Built with a **grounded Retrieval-Augmented Generation (RAG)** pipeline, strict 
 
 ---
 
-## 🎯 Problem Statement
+## 🎯 Problem Statement & Alignment Matrix
+
+### Official Track: **AI for Legal Assistance & Access**
+
+> **Goal**: Build a GenAI-powered solution that makes legal information and basic legal assistance more accessible by helping users understand, compare, and navigate legal documents and information.
+
+| Problem Statement Use Case / Requirement | ClariLex Implementation & Feature Module | Architectural Component & API Endpoint |
+| :--- | :--- | :--- |
+| **1. Simplifying complex legal documents** | Plain-language clause simplifier converts dense legal jargon into accessible English while preserving legal modal verbs (`shall` mandatory vs `may` permissive). | [`llmClient.js`](file:///d:/Prompt%20Wars/AI%20for%20Legal%20Assistance%20&%20Access/backend/services/llmClient.js) • `POST /api/analyze-contract` |
+| **2. Comparing contracts, agreements, or policies** | Multi-document side-by-side comparison matrix evaluating rent/salary, lock-in duration, notice periods, and deposit return terms. | [`comparison.js`](file:///d:/Prompt%20Wars/AI%20for%20Legal%20Assistance%20&%20Access/backend/routes/comparison.js) • `POST /api/compare-documents` |
+| **3. Highlighting important clauses, obligations, risks, or inconsistencies** | Automated severity tagging (`HIGH RISK`, `OBLIGATION`, `FAVORABLE`) with dual visual severity badges (WCAG 2.1 AA compliant). | [`llmClient.js`](file:///d:/Prompt%20Wars/AI%20for%20Legal%20Assistance%20&%20Access/backend/services/llmClient.js) • Clause Explainer Component |
+| **4. Answering questions based on provided legal documents** | Grounded Retrieval-Augmented Generation (RAG) Q&A engine with mandatory clause attributions (`[Clause 1.2]`) and anti-hallucination rules. | [`ragStore.js`](file:///d:/Prompt%20Wars/AI%20for%20Legal%20Assistance%20&%20Access/backend/services/ragStore.js) • `POST /api/grounded-qa` |
+| **5. Helping users understand options & next steps** | Pre-signing action checklist generator highlighting negotiation leverage points, clause modifications, and risk mitigation steps. | [`checklist.js`](file:///d:/Prompt%20Wars/AI%20for%20Legal%20Assistance%20&%20Access/backend/routes/checklist.js) • `POST /api/checklist-generator` |
+| **6. Generating summaries, checklists, or actionable outputs** | Instant plain-language summary cards and exportable Action Folio downloadable as `.txt` or `.json` files. | [`ActionFolio.jsx`](file:///d:/Prompt%20Wars/AI%20for%20Legal%20Assistance%20&%20Access/frontend/src/components/ActionFolio.jsx) • Action Folio Exporter |
+| **7. Helping users prepare information or questions for a legal professional** | Action Folio automatically generates a dedicated *"Questions for Legal Professional / Lawyer"* section based on detected high-risk clauses. | [`ActionFolio.jsx`](file:///d:/Prompt%20Wars/AI%20for%20Legal%20Assistance%20&%20Access/frontend/src/components/ActionFolio.jsx) • `lawyerItems` Generator |
+| **NOTE: Assistance, NOT Legal Advice** | Prominent legal disclaimer modal, non-definitive language (*"The document indicates..."*), and strictly educational assistance stance. | [`LegalDisclaimerModal.jsx`](file:///d:/Prompt%20Wars/AI%20for%20Legal%20Assistance%20&%20Access/frontend/src/components/LegalDisclaimerModal.jsx) |
+
+---
+
+## 🎯 Problem Context
 
 First-time legal signers (renters, fresh graduates, micro-entrepreneurs) regularly sign contracts containing unfavorable or illegal clauses because:
 1. **High Legal Fees**: Professional legal review costs ₹3,000–₹10,000+ per document, making it unaffordable for everyday transactions.
