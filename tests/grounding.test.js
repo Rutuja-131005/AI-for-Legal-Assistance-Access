@@ -18,16 +18,16 @@ assert.strictEqual(searchResults[0].id, '1.2', 'Query for lock-in forfeit must c
 
 // Test 2: Anti-Hallucination Resistance (Absent Answer Query)
 const absentAnswer = await generateLLMResponse({
-  prompt: 'USER QUESTION:\nIs swimming pool access and parking fee included?',
+  prompt: 'DOCUMENT CHUNKS:\n[Clause 1]: Rent is 35,000\n\nUSER QUESTION:\nIs swimming pool access and parking fee included?',
   expectedJson: false
 });
 assert(
-  absentAnswer.includes('not specified') || absentAnswer.includes('informational'),
+  absentAnswer.includes('not specified'),
   'System must state information is not specified for absent queries'
 );
 
 // Test 3: Modal Verb Semantics Preservation ('shall' / 'must' / 'may')
-const modalPrompt = `USER QUESTION:\nWhat are the notice period requirements?`;
+const modalPrompt = `DOCUMENT CHUNKS:\n[Clause 5.1 NOTICE PERIOD]: Post completion of Lock-in Period, either party must give 2 months written notice prior to termination.\n\nUSER QUESTION:\nWhat are the notice period requirements?`;
 const modalResponse = await generateLLMResponse({ prompt: modalPrompt, expectedJson: false });
 assert(
   modalResponse.includes('must') || modalResponse.includes('shall') || modalResponse.includes('document states'),
