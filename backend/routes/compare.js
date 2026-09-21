@@ -5,7 +5,7 @@ const router = express.Router();
 
 router.post('/', async (req, res) => {
   try {
-    const { docAText, docBText, docAName, docBName, apiKey } = req.body;
+    const { docAText, docBText, docAName, docBName } = req.body;
 
     if (!docAText || !docBText) {
       return res.status(400).json({ error: 'Both Document A and Document B text are required for comparison.' });
@@ -15,14 +15,13 @@ router.post('/', async (req, res) => {
 
     const comparison = await generateLLMResponse({
       prompt,
-      apiKey,
       expectedJson: true
     });
 
     res.json({ comparison });
   } catch (error) {
-    console.error('Compare Error:', error);
-    res.status(500).json({ error: 'Failed to compare documents: ' + error.message });
+    console.error('[Compare Error]', error.message);
+    res.status(500).json({ error: 'Document comparison failed. Please try again.' });
   }
 });
 

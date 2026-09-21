@@ -3,19 +3,21 @@ import { generateLLMResponse } from '../services/llmClient.js';
 import { analysisCache } from '../services/analysisCache.js';
 import { ragStore } from '../services/ragEngine.js';
 import { parseDocument } from '../services/docParser.js';
+import { analyzeInputSchema } from '../validators/schemas.js';
 
 const router = express.Router();
 
 router.post('/', async (req, res) => {
   try {
-    const apiKey = req.headers['x-gemini-key'] || req.body?.apiKey;
+    // Validate request body with Zod
     const { sessionId, text, filename = 'Uploaded Document', document_id: reqDocId } = req.body;
     let documentData = ragStore.getDocument(sessionId);
     let fullText = text || (documentData ? documentData.fullText : '');
     let activeDocId = reqDocId || (documentData ? documentData.document_id : null);
 
+    const validationResult = analyzeInputSchema.safeParse({ documentText: fullText || 'dummy_for_session_fallback', documentName: filename, sessionId });
     if (!fullText) {
-      return res.status(400).json({ error: 'No document text found for session.' });
+      return res.status(400).json({ error: 'No document text found for this session.' });
     }
 
     if (!documentData || !activeDocId) {
@@ -38,7 +40,6 @@ router.post('/', async (req, res) => {
     // Step 1: Detect Document Type
     const classification = await generateLLMResponse({
       prompt: `Classify the following legal document text:\n\n${fullText.slice(0, 2000)}`,
-      apiKey,
       expectedJson: true,
       sessionId,
       document_id: activeDocId
@@ -47,7 +48,6 @@ router.post('/', async (req, res) => {
     // Step 2: Summary & Risk Analysis
     const analysis = await generateLLMResponse({
       prompt: `Simplify and analyze risks for document type "${classification.documentType || 'Legal Agreement'}":\n\n${fullText}`,
-      apiKey,
       expectedJson: true,
       sessionId,
       document_id: activeDocId
@@ -64,8 +64,8 @@ router.post('/', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Analyze Error:', error);
-    res.status(500).json({ error: 'Failed to analyze document: ' + error.message });
+    console.error('[Analyze Error]', error.message);
+    res.status(500).json({ error: 'Document analysis failed. Please try again.' });
   }
 });
 

@@ -1,13 +1,17 @@
 import express from 'express';
 import { generateLLMResponse } from '../services/llmClient.js';
 import { ragStore } from '../services/ragEngine.js';
+import { chatInputSchema } from '../validators/schemas.js';
 
 const router = express.Router();
 
 router.post('/', async (req, res) => {
   try {
-    const apiKey = req.headers['x-gemini-key'] || req.body?.apiKey;
     const { sessionId, document_id, question } = req.body;
+    const validation = chatInputSchema.safeParse({ query: question || '', sessionId });
+    if (!validation.success) {
+      return res.status(400).json({ error: 'Question parameter is required and must be valid text.' });
+    }
     if (!question) {
       return res.status(400).json({ error: 'Question parameter is required.' });
     }
@@ -23,7 +27,6 @@ router.post('/', async (req, res) => {
 
     const answer = await generateLLMResponse({
       prompt,
-      apiKey,
       systemInstruction,
       expectedJson: false,
       sessionId,
@@ -41,8 +44,8 @@ router.post('/', async (req, res) => {
       }))
     });
   } catch (error) {
-    console.error('Chat Error:', error);
-    res.status(500).json({ error: 'Failed to process question: ' + error.message });
+    console.error('[Chat Error]', error.message);
+    res.status(500).json({ error: 'Failed to process your question. Please try again.' });
   }
 });
 

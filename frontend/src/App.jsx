@@ -97,7 +97,7 @@ export default function App() {
         <UploadZone onDocumentLoaded={handleDocumentLoaded} loading={loading} />
 
         {loading ? (
-          <div className="clarilex-card" style={{ textAlign: 'center', padding: '3rem' }}>
+          <div className="clarilex-card" role="status" aria-live="polite" style={{ textAlign: 'center', padding: '3rem' }}>
             <div style={{ fontSize: '1.2rem', fontFamily: 'var(--font-serif)', color: '#004243', marginBottom: '0.5rem' }}>
               ⚖️ ClariLex GenAI Legal Engine is analyzing document...
             </div>

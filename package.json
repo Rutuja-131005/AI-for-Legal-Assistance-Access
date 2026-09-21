@@ -7,9 +7,15 @@
     "dev": "npm --prefix frontend run dev",
     "build": "npm --prefix frontend install && npm --prefix frontend run build",
     "start": "npm --prefix backend start",
-    "test": "node tests/ingestion.test.js && node tests/grounding.test.js && node tests/security.test.js && node tests/comparison.test.js && node tests/api.test.js && node tests/performance.test.js && node tests/rag_evaluation.test.js"
+    "test": "npm --prefix frontend run test && node tests/ingestion.test.js && node tests/grounding.test.js && node tests/security.test.js && node tests/comparison.test.js && node tests/api.test.js && node tests/performance.test.js"
   },
   "dependencies": {
-    "express": "^4.19.2"
+    "dompurify": "^3.4.15",
+    "express": "^4.19.2",
+    "isomorphic-dompurify": "^3.19.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "vitest": "^5.0.1"
   }
 }

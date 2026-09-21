@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { UploadCloud, FileText, Sparkles, Home, Briefcase, CreditCard, ShieldAlert } from 'lucide-react';
+import { Home, Briefcase } from 'lucide-react';
 import { SAMPLE_DOCUMENTS } from '../data/sampleDocs';
+import FileDropArea from './upload/FileDropArea.jsx';
+import PasteTextArea from './upload/PasteTextArea.jsx';
 
-export default function UploadZone({ onDocumentLoaded, loading }) {
-  const [activeMode, setActiveMode] = useState('upload'); // 'upload', 'text', 'samples'
-  const [rawTextInput, setRawTextInput] = useState('');
-  const [dragOver, setDragOver] = useState(false);
+export default function UploadZone({ onDocumentLoaded }) {
+  const [activeMode, setActiveMode] = useState('upload');
 
   const handleFileUpload = async (file) => {
     if (!file) return;
@@ -28,7 +28,7 @@ export default function UploadZone({ onDocumentLoaded, loading }) {
         });
       }
     } catch (err) {
-      console.error('File upload failed, using client text reader fallback:', err);
+      console.error('File upload fallback:', err);
       const reader = new FileReader();
       reader.onload = (e) => {
         onDocumentLoaded({
@@ -42,14 +42,12 @@ export default function UploadZone({ onDocumentLoaded, loading }) {
     }
   };
 
-  const handleTextSubmit = (e) => {
-    e.preventDefault();
-    if (!rawTextInput.trim()) return;
+  const handleTextSubmit = (rawText) => {
     onDocumentLoaded({
       sessionId: `session-${Date.now()}`,
       filename: 'Pasted Legal Text',
-      text: rawTextInput,
-      chunks: [{ id: 'clause-1', title: '1. Document Content', text: rawTextInput }]
+      text: rawText,
+      chunks: [{ id: 'clause-1', title: '1. Document Content', text: rawText }]
     });
   };
 
@@ -70,25 +68,28 @@ export default function UploadZone({ onDocumentLoaded, loading }) {
             Select or Upload Legal Agreement
           </h2>
           <p style={{ fontSize: '0.85rem', color: '#666', margin: 0 }}>
-            Upload PDF/DOCX or pick a 1-click pre-loaded sample document to test persona Riya's experience.
+            Upload PDF/DOCX or pick a 1-click pre-loaded sample document.
           </p>
         </div>
 
-        <div style={{ display: 'flex', gap: '0.5rem', background: '#f2f3fa', padding: '0.25rem', borderRadius: '6px' }}>
+        <div style={{ display: 'flex', gap: '0.5rem', background: '#f2f3fa', padding: '0.25rem', borderRadius: '6px' }} role="group" aria-label="Document input mode selector">
           <button
             onClick={() => setActiveMode('upload')}
+            aria-pressed={activeMode === 'upload'}
             style={{ padding: '0.35rem 0.75rem', borderRadius: '4px', border: 'none', background: activeMode === 'upload' ? 'white' : 'transparent', fontWeight: activeMode === 'upload' ? 600 : 400, cursor: 'pointer', fontSize: '0.8rem' }}
           >
             Upload File
           </button>
           <button
             onClick={() => setActiveMode('samples')}
+            aria-pressed={activeMode === 'samples'}
             style={{ padding: '0.35rem 0.75rem', borderRadius: '4px', border: 'none', background: activeMode === 'samples' ? 'white' : 'transparent', fontWeight: activeMode === 'samples' ? 600 : 400, cursor: 'pointer', fontSize: '0.8rem', color: '#004243' }}
           >
             ✨ 1-Click Samples
           </button>
           <button
             onClick={() => setActiveMode('text')}
+            aria-pressed={activeMode === 'text'}
             style={{ padding: '0.35rem 0.75rem', borderRadius: '4px', border: 'none', background: activeMode === 'text' ? 'white' : 'transparent', fontWeight: activeMode === 'text' ? 600 : 400, cursor: 'pointer', fontSize: '0.8rem' }}
           >
             Paste Text
@@ -96,38 +97,29 @@ export default function UploadZone({ onDocumentLoaded, loading }) {
         </div>
       </div>
 
-      {/* 1-Click Samples Mode */}
       {activeMode === 'samples' && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem', marginTop: '1rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem', marginTop: '1rem' }} role="list" aria-label="Pre-loaded sample documents">
           {SAMPLE_DOCUMENTS.map((sample) => (
             <div
               key={sample.id}
+              role="button"
+              tabIndex={0}
+              aria-label={`Analyze ${sample.title}: ${sample.subtitle}`}
               onClick={() => handleSampleSelect(sample)}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleSampleSelect(sample); } }}
               style={{
                 background: '#ffffff',
                 border: '1.5px solid #004243',
                 borderRadius: '8px',
                 padding: '1rem',
-                cursor: 'pointer',
-                transition: 'transform 0.2s, box-shadow 0.2s',
-                position: 'relative'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,66,67,0.15)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'none';
-                e.currentTarget.style.boxShadow = 'none';
+                cursor: 'pointer'
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#004243', marginBottom: '0.5rem' }}>
                 {sample.icon === 'Home' ? <Home size={18} /> : <Briefcase size={18} />}
                 <strong style={{ fontSize: '0.95rem' }}>{sample.title}</strong>
               </div>
-              <p style={{ fontSize: '0.8rem', color: '#555', margin: 0, marginBottom: '0.75rem' }}>
-                {sample.subtitle}
-              </p>
+              <p style={{ fontSize: '0.8rem', color: '#555', margin: 0, marginBottom: '0.75rem' }}>{sample.subtitle}</p>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span className="badge badge-standard">{sample.category}</span>
                 <span style={{ fontSize: '0.75rem', color: '#004243', fontWeight: 600 }}>Analyze Now →</span>
@@ -137,51 +129,8 @@ export default function UploadZone({ onDocumentLoaded, loading }) {
         </div>
       )}
 
-      {/* Upload File Mode */}
-      {activeMode === 'upload' && (
-        <div
-          onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-          onDragLeave={() => setDragOver(false)}
-          onDrop={(e) => { e.preventDefault(); setDragOver(false); if (e.dataTransfer.files[0]) handleFileUpload(e.dataTransfer.files[0]); }}
-          style={{
-            border: `2px dashed ${dragOver ? '#004243' : '#bfc8c8'}`,
-            background: dragOver ? '#f0f9f9' : '#fafafa',
-            borderRadius: '8px',
-            padding: '2rem 1rem',
-            textAlign: 'center',
-            cursor: 'pointer'
-          }}
-        >
-          <UploadCloud size={40} style={{ color: '#004243', marginBottom: '0.5rem' }} />
-          <h4 style={{ margin: '0 0 0.25rem 0', color: '#191c21' }}>Drag & Drop your document here</h4>
-          <p style={{ fontSize: '0.85rem', color: '#666', margin: '0 0 1rem 0' }}>Supports PDF, DOCX, TXT (up to 10 MB)</p>
-          <label className="btn-primary" style={{ cursor: 'pointer' }}>
-            Browse File
-            <input
-              type="file"
-              accept=".pdf,.docx,.txt"
-              style={{ display: 'none' }}
-              onChange={(e) => e.target.files[0] && handleFileUpload(e.target.files[0])}
-            />
-          </label>
-        </div>
-      )}
-
-      {/* Paste Text Mode */}
-      {activeMode === 'text' && (
-        <form onSubmit={handleTextSubmit}>
-          <textarea
-            rows={5}
-            value={rawTextInput}
-            onChange={(e) => setRawTextInput(e.target.value)}
-            placeholder="Paste raw contract clauses, rental agreement text, or offer letter text here..."
-            style={{ width: '100%', padding: '0.75rem', borderRadius: '6px', border: '1px solid #ccc', fontSize: '0.85rem', fontFamily: 'var(--font-sans)', marginBottom: '0.75rem' }}
-          />
-          <button type="submit" className="btn-primary" disabled={!rawTextInput.trim()}>
-            Analyze Pasted Text
-          </button>
-        </form>
-      )}
+      {activeMode === 'upload' && <FileDropArea onFileUpload={handleFileUpload} />}
+      {activeMode === 'text' && <PasteTextArea onTextSubmit={handleTextSubmit} />}
     </div>
   );
 }
