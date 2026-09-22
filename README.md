@@ -34,14 +34,8 @@ Legal information can often be complex, difficult to understand, and challenging
 
 ## 🔗 Live Demo
 
-- **Live Web Application**: [https://ai-for-legal-assistance-access-seven.vercel.app](https://ai-for-legal-assistance-access-seven.vercel.app)
+- **Live Web Application**: [https://ai-for-legal-assistance-access-g85u-pi.vercel.app/](https://ai-for-legal-assistance-access-g85u-pi.vercel.app/)
 - **Deployment Platform**: Vercel Serverless Functions + Vite SPA
-
----
-
-## 🖼️ Screenshots
-
-*(Include screenshots of the Summary View, Grounded Q&A tab, Side-by-Side Comparison Matrix, and Action Checklist)*
 
 ---
 
