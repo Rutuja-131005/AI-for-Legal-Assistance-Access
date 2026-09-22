@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { GitCompare, CheckCircle2, AlertTriangle, ArrowRight } from 'lucide-react';
+import { GitCompare } from 'lucide-react';
 import { SAMPLE_DOCUMENTS } from '../data/sampleDocs';
 
 export default function CompareView() {
@@ -28,9 +28,9 @@ export default function CompareView() {
       setComparisonResult({
         comparisonSummary: `${docA.title} imposes a 6-month lock-in and 10-month deposit, whereas ${docB.title} features a 90-day notice period and non-compete restrictions.`,
         matrix: [
-          { parameter: 'Monthly Rent / Salary', docAValue: 'INR 35,000 / month', docBValue: 'INR 22,00,000 / year (Fixed CTC)', verdict: 'Different document domain' },
-          { parameter: 'Lock-in / Notice Period', docAValue: '6 Months Lock-in + 2 Mo Notice', docBValue: '90 Days Mandatory Notice', verdict: 'Doc A requires lower exit timeline post lock-in' },
-          { parameter: 'Financial Penalties', docAValue: '1 Month Rent painting deduction', docBValue: 'INR 2 Lakh Joining Bonus clawback', verdict: 'Doc A has lower monetary exposure' }
+          { parameter: 'Termination Notice', docAValue: '30 days notice', docBValue: '60 days notice', changeType: 'Modified', verdict: 'May extend your required exit notice period' },
+          { parameter: 'Security Deposit', docAValue: 'INR 3,50,000 (10 Months)', docBValue: 'INR 1,05,000 (3 Months)', changeType: 'Favorable', verdict: 'Reduces upfront capital requirement by INR 2.45L' },
+          { parameter: 'Painting Deduction', docAValue: '1 Month Rent auto-deducted', docBValue: 'Actual bill receipt basis', changeType: 'Modified', verdict: 'Prevents automatic flat forfeiture' }
         ],
         recommendation: 'Evaluate exit terms carefully before signing either agreement.'
       });
@@ -46,17 +46,18 @@ export default function CompareView() {
           ⚖️ Side-by-Side Document Comparison Engine
         </h3>
         <p style={{ fontSize: '0.85rem', color: '#666', margin: 0 }}>
-          Compare two agreements (e.g., Job Offer A vs Job Offer B, or Flat A vs Flat B) across key financial and legal parameters.
+          Compare two legal contracts clause-by-clause with structured impact analysis.
         </p>
       </div>
 
-      {/* Document Selectors */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
         <div style={{ border: '1px solid #e1e2e9', padding: '1rem', borderRadius: '6px', background: '#ffffff' }}>
-          <label style={{ display: 'block', fontWeight: 600, fontSize: '0.85rem', color: '#004243', marginBottom: '0.5rem' }}>
+          <label htmlFor="select-doc-a" style={{ display: 'block', fontWeight: 600, fontSize: '0.85rem', color: '#004243', marginBottom: '0.5rem' }}>
             Document A (Baseline)
           </label>
           <select
+            id="select-doc-a"
+            aria-label="Select Baseline Document A"
             value={docA.id}
             onChange={(e) => setDocA(SAMPLE_DOCUMENTS.find(d => d.id === e.target.value) || docA)}
             style={{ width: '100%', padding: '0.5rem', borderRadius: '6px', border: '1px solid #ccc', fontSize: '0.85rem' }}
@@ -65,16 +66,15 @@ export default function CompareView() {
               <option key={d.id} value={d.id}>{d.title} ({d.category})</option>
             ))}
           </select>
-          <div style={{ marginTop: '0.75rem', fontSize: '0.8rem', color: '#555', background: '#f8f9ff', padding: '0.5rem', borderRadius: '4px' }}>
-            <strong>Parties:</strong> {docA.classification?.detectedParties?.join(', ') || 'Standard Parties'}
-          </div>
         </div>
 
         <div style={{ border: '1px solid #e1e2e9', padding: '1rem', borderRadius: '6px', background: '#ffffff' }}>
-          <label style={{ display: 'block', fontWeight: 600, fontSize: '0.85rem', color: '#004243', marginBottom: '0.5rem' }}>
+          <label htmlFor="select-doc-b" style={{ display: 'block', fontWeight: 600, fontSize: '0.85rem', color: '#004243', marginBottom: '0.5rem' }}>
             Document B (Comparison Target)
           </label>
           <select
+            id="select-doc-b"
+            aria-label="Select Comparison Target Document B"
             value={docB.id}
             onChange={(e) => setDocB(SAMPLE_DOCUMENTS.find(d => d.id === e.target.value) || docB)}
             style={{ width: '100%', padding: '0.5rem', borderRadius: '6px', border: '1px solid #ccc', fontSize: '0.85rem' }}
@@ -83,20 +83,16 @@ export default function CompareView() {
               <option key={d.id} value={d.id}>{d.title} ({d.category})</option>
             ))}
           </select>
-          <div style={{ marginTop: '0.75rem', fontSize: '0.8rem', color: '#555', background: '#f8f9ff', padding: '0.5rem', borderRadius: '4px' }}>
-            <strong>Parties:</strong> {docB.classification?.detectedParties?.join(', ') || 'Standard Parties'}
-          </div>
         </div>
       </div>
 
       <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-        <button onClick={handleCompare} className="btn-primary" disabled={comparing}>
-          <GitCompare size={16} />
+        <button onClick={handleCompare} className="btn-primary" disabled={comparing} aria-label="Run side-by-side legal comparison">
+          <GitCompare size={16} aria-hidden="true" />
           {comparing ? 'Analyzing Differences...' : 'Run Side-by-Side Comparison'}
         </button>
       </div>
 
-      {/* Comparison Results */}
       {comparisonResult && (
         <div style={{ borderTop: '2px solid #004243', paddingTop: '1.25rem' }}>
           <div style={{ background: '#f0f9f9', border: '1px solid #aceeef', padding: '1rem', borderRadius: '6px', marginBottom: '1.25rem' }}>
@@ -105,17 +101,18 @@ export default function CompareView() {
           </div>
 
           <h4 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.1rem', color: '#004243', marginBottom: '0.75rem' }}>
-            Term-by-Term Comparison Matrix
+            Structured 5-Column Clause Comparison Matrix
           </h4>
 
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
               <thead>
                 <tr style={{ background: '#004243', color: 'white' }}>
-                  <th style={{ padding: '0.75rem', textAlign: 'left', border: '1px solid #004243' }}>Parameter</th>
-                  <th style={{ padding: '0.75rem', textAlign: 'left', border: '1px solid #004243' }}>{docA.title}</th>
-                  <th style={{ padding: '0.75rem', textAlign: 'left', border: '1px solid #004243' }}>{docB.title}</th>
-                  <th style={{ padding: '0.75rem', textAlign: 'left', border: '1px solid #004243' }}>Key Analysis / Verdict</th>
+                  <th style={{ padding: '0.75rem', textAlign: 'left' }}>Clause / Term</th>
+                  <th style={{ padding: '0.75rem', textAlign: 'left' }}>Original Text ({docA.title})</th>
+                  <th style={{ padding: '0.75rem', textAlign: 'left' }}>Updated Text ({docB.title})</th>
+                  <th style={{ padding: '0.75rem', textAlign: 'center' }}>Change Type</th>
+                  <th style={{ padding: '0.75rem', textAlign: 'left' }}>Potential Effect / Impact</th>
                 </tr>
               </thead>
               <tbody>
@@ -124,6 +121,11 @@ export default function CompareView() {
                     <td style={{ padding: '0.75rem', fontWeight: 600, color: '#004243' }}>{row.parameter}</td>
                     <td style={{ padding: '0.75rem' }}>{row.docAValue}</td>
                     <td style={{ padding: '0.75rem' }}>{row.docBValue}</td>
+                    <td style={{ padding: '0.75rem', textAlign: 'center' }}>
+                      <span className={`badge ${row.changeType === 'Favorable' ? 'badge-favorable' : 'badge-obligation'}`}>
+                        {row.changeType || 'Modified'}
+                      </span>
+                    </td>
                     <td style={{ padding: '0.75rem', color: '#0e5138', fontWeight: 500 }}>{row.verdict}</td>
                   </tr>
                 ))}

@@ -1,0 +1,48 @@
+name: Tests & Code Hardening CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    name: Build & Run Test Suites
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: |
+          npm install
+          npm --prefix frontend install
+
+      - name: Run Frontend Vitest Specs
+        run: |
+          npm --prefix frontend run test
+
+      - name: Run Backend Security & Domain Test Suites
+        run: |
+          node tests/ingestion.test.js
+          node tests/grounding.test.js
+          node tests/security.test.js
+          node tests/comparison.test.js
+          node tests/api.test.js
+          node tests/performance.test.js
+
+      - name: Verify Frontend Production Build
+        run: |
+          npm run build

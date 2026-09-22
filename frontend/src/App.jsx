@@ -10,6 +10,7 @@ import { SAMPLE_DOCUMENTS } from './data/sampleDocs';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('summary');
+  const [jurisdiction, setJurisdiction] = useState('India (General)');
   const [docSession, setDocSession] = useState({
     sessionId: `sample-${SAMPLE_DOCUMENTS[0].id}`,
     document_id: `DOC_SAMPLE_${SAMPLE_DOCUMENTS[0].id}`,
@@ -41,7 +42,6 @@ export default function App() {
       return;
     }
 
-    // Call API server for live upload analysis
     setLoading(true);
     try {
       const response = await fetch('/api/analyze', {
@@ -51,7 +51,8 @@ export default function App() {
           sessionId: loadedData.sessionId,
           document_id: loadedData.document_id,
           text: loadedData.text,
-          filename: loadedData.filename
+          filename: loadedData.filename,
+          jurisdiction
         })
       });
       const data = await response.json();
@@ -66,7 +67,7 @@ export default function App() {
         checklist: data.summary?.checklist || SAMPLE_DOCUMENTS[0].checklist
       });
     } catch (err) {
-      console.warn('API analysis call failed, applying client analysis fallback:', err);
+      console.warn('API analysis call fallback:', err);
       setDocSession({
         sessionId: loadedData.sessionId,
         document_id: loadedData.document_id || `DOC_${Date.now()}`,
@@ -90,10 +91,11 @@ export default function App() {
       <Header
         activeTab={activeTab}
         setActiveTab={setActiveTab}
+        jurisdiction={jurisdiction}
+        setJurisdiction={setJurisdiction}
       />
 
       <main id="main-content" className="main-content" tabIndex="-1">
-
         <UploadZone onDocumentLoaded={handleDocumentLoaded} loading={loading} />
 
         {loading ? (
@@ -101,7 +103,7 @@ export default function App() {
             <div style={{ fontSize: '1.2rem', fontFamily: 'var(--font-serif)', color: '#004243', marginBottom: '0.5rem' }}>
               ⚖️ ClariLex GenAI Legal Engine is analyzing document...
             </div>
-            <p style={{ fontSize: '0.85rem', color: '#666' }}>Extracting clauses, checking risk levels, and preparing plain-language translations.</p>
+            <p style={{ fontSize: '0.85rem', color: '#666' }}>Extracting clauses, checking risk levels for {jurisdiction}, and preparing plain-language translations.</p>
           </div>
         ) : (
           <>
@@ -110,6 +112,7 @@ export default function App() {
                 docData={docSession}
                 classification={docSession.classification}
                 summary={docSession.summary}
+                jurisdiction={jurisdiction}
               />
             )}
 
@@ -121,9 +124,7 @@ export default function App() {
               />
             )}
 
-            {activeTab === 'compare' && (
-              <CompareView />
-            )}
+            {activeTab === 'compare' && <CompareView />}
 
             {activeTab === 'checklist' && (
               <ChecklistView
